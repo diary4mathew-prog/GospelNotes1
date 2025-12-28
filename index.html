@@ -15,12 +15,12 @@
   input, textarea, select, button { width:100%; box-sizing:border-box; padding:12px; margin-top:4px; margin-bottom:12px; font-size:16px; border-radius:8px; border:1px solid var(--border); outline:none; }
   input.invalid { border-color:var(--error); background:#fff8f8; animation:shake 0.2s ease-in-out 0s 2; }
   @keyframes shake { 0%, 100% { transform:translateX(0); } 25% { transform:translateX(3px); } 75% { transform:translateX(-3px); } }
-  textarea { min-height:350px; resize:vertical; line-height:1.5; font-family:inherit; }
+  textarea { min-height:400px; resize:vertical; line-height:1.5; font-family:inherit; }
   .row { display:flex; gap:10px; }
-  button { background:var(--primary); color:#fff; border:none; font-weight:bold; cursor:pointer; }
+  button { background:var(--primary); color:#fff; border:none; font-weight:bold; cursor:pointer; transition: 0.2s; }
+  button:active { transform: scale(0.98); opacity: 0.9; }
   .tag-bar { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; background: #eee; padding: 10px; border-radius: 8px; }
   .tag-bar button { width:auto; padding:8px 12px; font-size:13px; margin:0; background:#fff; color:#333; border:1px solid #ccc; flex-grow: 1; }
-  .tag-bar button:active { background:var(--primary-light); color:white; }
   .book-list { position:absolute; background:#fff; border:1px solid var(--border); max-height:180px; overflow-y:auto; width:100%; z-index:10; display:none; border-radius:8px; }
   .book-item { padding:10px; cursor:pointer; border-bottom: 1px solid #eee; }
   .book-item:hover { background:#f6f3ef; font-weight:bold; }
@@ -32,13 +32,11 @@
 <body>
 <div class="container">
   <div class="card">
-    <h2>Details</h2>
+    <h2>General</h2>
     <div class="row">
       <div style="flex:1"><label>Date</label><input type="date" id="date"></div>
-      <div style="flex:2"><label>Occasion</label><input type="text" id="occasion" placeholder="Christmas / Sunday Service" oninput="save()"></div>
+      <div style="flex:2"><label>Sermon Title</label><input type="text" id="subject" placeholder="e.g. The Good Shepherd" oninput="save()"></div>
     </div>
-    <label>Subject</label>
-    <input type="text" id="subject" placeholder="Sermon Title" oninput="save()">
   </div>
 
   <div class="card" style="position:relative;">
@@ -75,7 +73,7 @@
       <button onclick="makeBold()"><b>B</b> Bold</button>
       <button onclick="insertTime()">🕒 Time</button>
     </div>
-    <textarea id="notes" placeholder="Notes..."></textarea>
+    <textarea id="notes" placeholder="Start typing..."></textarea>
     <div class="row">
       <button style="background:#0277bd; flex:1;" onclick="copyNotes()">📋 Copy All</button>
       <button style="background:var(--success); flex:2;" onclick="sendEmail()">📧 Email to Gmail</button>
@@ -94,19 +92,17 @@ const sep="----------------------------";
 date.valueAsDate=new Date();
 
 (function restore(){
-  const d=JSON.parse(localStorage.getItem("church_student_pro_final_v9")||"{}");
+  const d=JSON.parse(localStorage.getItem("church_archivist_final_v11")||"{}");
   if(d.date)date.value=d.date;
-  if(d.occasion)occasion.value=d.occasion;
   if(d.subject)subject.value=d.subject;
   if(d.notes)notes.value=d.notes;
 })();
 
 function save() {
-  localStorage.setItem("church_student_pro_final_v9", JSON.stringify({
-    date:date.value, occasion:occasion.value, subject:subject.value, notes:notes.value
+  localStorage.setItem("church_archivist_final_v11", JSON.stringify({
+    date:date.value, subject:subject.value, notes:notes.value
   }));
 }
-
 setInterval(save, 5000);
 
 function filterBooks(){
@@ -147,27 +143,23 @@ function refText(){ return `${bookInput.value} ${chapter.value}:${verseFrom.valu
 function insertAtCursor(text) {
     const start = notes.selectionStart;
     const end = notes.selectionEnd;
-    const oldText = notes.value;
-    notes.value = oldText.substring(0, start) + text + oldText.substring(end);
+    notes.value = notes.value.substring(0, start) + text + notes.value.substring(end);
     notes.selectionStart = notes.selectionEnd = start + text.length;
-    notes.focus();
-    save();
+    notes.focus(); save();
 }
 
 function addRef(){
   if(!bookInput.value) return;
-  const content = `\n${sep}\n📖 ${refText()} (${version.value.toUpperCase()})\n${sep}\n`;
-  insertAtCursor(content);
+  insertAtCursor(`\n${sep}\n📖 ${refText()} (${version.value.toUpperCase()})\n${sep}\n`);
 }
 
 async function addRefVerse(){
   if(!bookInput.value) return; 
-  const r=refText(); const v=version.value; const btn=event.target; btn.textContent="...";
+  const btn=event.target; btn.textContent="...";
   try {
-    const res=await fetch(`https://bible-api.com/${encodeURIComponent(r)}?translation=${v}`);
+    const res=await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
     const d=await res.json(); 
-    const content = `\n${sep}\n📖 ${r} (${v.toUpperCase()})\n\n${d.text||""}\n${sep}\n`;
-    insertAtCursor(content);
+    insertAtCursor(`\n${sep}\n📖 ${refText()} (${version.value.toUpperCase()})\n\n${d.text||""}\n${sep}\n`);
   } catch(e){ alert("Error"); } finally { btn.textContent="Add Ref + Verse"; }
 }
 
@@ -178,41 +170,54 @@ async function previewVerse(){
 }
 
 function insertTemplate() {
-    const template = `[SERMON OUTLINE]\nOccasion: ${occasion.value}\nSpeaker: \nTheme: \n\nPoint 1: \nPoint 2: \nPoint 3: \n\nSummary: \n\n--------------------------\n`;
+    const template = `[SERMON OUTLINE]\nOccasion: \nSpeaker: \nTheme: \n\nPoint 1: \nPoint 2: \nPoint 3: \n\nSummary: \n\n--------------------------\n`;
     insertAtCursor(template);
-    const speakerIndex = notes.value.indexOf("Speaker: ") + 9;
-    notes.selectionStart = notes.selectionEnd = speakerIndex;
+    notes.selectionStart = notes.selectionEnd = notes.value.indexOf("Occasion: ") + 10;
     notes.focus();
 }
 
 function insertTag(tag) { insertAtCursor(tag); }
-
-function insertTime() {
-    const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    insertAtCursor(`[${now}] `);
-}
+function insertTime() { insertAtCursor(`[${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] `); }
 
 function makeBold() {
-    const start = notes.selectionStart;
-    const end = notes.selectionEnd;
-    const selectedText = notes.value.substring(start, end);
-    if(selectedText) {
-        const boldText = `**${selectedText}**`;
-        notes.value = notes.value.substring(0, start) + boldText + notes.value.substring(end);
-        notes.selectionStart = notes.selectionEnd = start + boldText.length;
-    } else {
-        insertAtCursor("**BOLD**");
-    }
+    const s = notes.selectionStart; const e = notes.selectionEnd;
+    const txt = notes.value.substring(s, e);
+    if(txt) {
+        const bld = `**${txt}**`;
+        notes.value = notes.value.substring(0, s) + bld + notes.value.substring(e);
+        notes.selectionStart = notes.selectionEnd = s + bld.length;
+    } else { insertAtCursor("**BOLD**"); }
     save();
 }
 
 function closePopup(){popup.style.display="none";}
 function copyNotes(){ notes.select(); document.execCommand("copy"); alert("Copied!"); }
+
 function sendEmail(){
-  const body = `Date: ${date.value}\nOccasion: ${occasion.value}\nSubject: ${subject.value}\n\n${notes.value}`;
-  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(occasion.value + " - " + subject.value)}&body=${encodeURIComponent(body)}`;
+  const val = notes.value;
+  let speaker = "";
+  let occasion = "";
+  
+  // Extract Speaker and Occasion from the text body
+  const lines = val.split('\n');
+  lines.forEach(line => {
+    if(line.includes("Speaker:")) speaker = line.replace("Speaker:", "").trim();
+    if(line.includes("Occasion:")) occasion = line.replace("Occasion:", "").trim();
+  });
+
+  // Build a Smart Subject Line
+  let subjectParts = [];
+  if(occasion) subjectParts.push(occasion);
+  if(speaker) subjectParts.push(speaker);
+  subjectParts.push(subject.value || "Sermon Notes");
+
+  const finalSubject = subjectParts.join(" - ");
+  const body = `Date: ${date.value}\n\n${val}`;
+  
+  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(finalSubject)}&body=${encodeURIComponent(body)}`;
 }
-function resetAll(){ if(confirm("Clear?")){ localStorage.removeItem("church_student_pro_final_v9"); location.reload(); } }
+
+function resetAll(){ if(confirm("Clear everything?")){ localStorage.removeItem("church_archivist_v11"); location.reload(); } }
 </script>
 </body>
 </html>
