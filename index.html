@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Church Speech Notes Pro</title>
+
+<style>
+:root {
+  --primary:#6b4f3f;
+  --primary-light:#8a6d5a;
+  --bg:#f2ede4;
+  --card:#ffffff;
+  --border:#d1c7bc;
+  --success:#2e7d32;
+}
+
+body {
+  margin:0; padding:15px;
+  font-family: 'Segoe UI', sans-serif;
+  background:var(--bg);
+  display:flex; justify-content:center;
+}
+
+.container { max-width:600px; width:100%; }
+
+.card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:18px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+h2 { margin:0 0 10px 0; font-size:1rem; color:var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+
+label { font-size:.75rem; font-weight:600; color:#777; display: block; margin-bottom: 2px; }
+
+input, textarea, select, button {
+  width:100%; box-sizing:border-box;
+  padding:12px; margin-top:4px; margin-bottom:12px;
+  font-size:16px; border-radius:8px; border:1px solid var(--border);
+  outline: none;
+}
+
+input:focus, textarea:focus { border-color: var(--primary); }
+
+textarea { min-height:300px; resize:vertical; line-height: 1.5; }
+
+.row { display:flex; gap:8px; }
+
+button {
+  background:var(--primary); color:#fff;
+  border:none; font-weight:bold; cursor: pointer;
+  transition: opacity 0.2s;
+}
+button:active { opacity: 0.8; }
+
+.book-list {
+  position:absolute; background:#fff; border:1px solid var(--border);
+  max-height:180px; overflow-y:auto; width:100%; z-index:10;
+  display:none; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.book-item { padding:10px; cursor:pointer; border-bottom: 1px solid #eee; }
+.book-item:hover { background:#f6f3ef; font-weight: bold; }
+
+#popup {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.7); z-index:100; backdrop-filter: blur(2px);
+}
+
+.popup-content {
+  background:#fff; max-width:500px; margin:10% auto;
+  padding:20px; border-radius:12px; position: relative;
+}
+
+.clear-x {
+  position: absolute; right: 12px; top: 42px;
+  cursor: pointer; color: #999; font-weight: bold;
+}
+
+@media print {
+  body { background:white; padding:0; }
+  .card:not(:last-child), button, .book-list, #popup, .clear-x, label, h2 { display:none!important; }
+  .card:last-child { border: none; width: 100%; }
+  textarea { border:none; font-size:14pt; width: 100%; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="card">
+  <h2>General Info</h2>
+  <div class="row">
+    <div style="flex:0.4"><label>Date</label><input type="date" id="date"></div>
+    <div style="flex:1"><label>Subject</label><input type="text" id="subject" placeholder="Sermon Title"></div>
+  </div>
+</div>
+
+<div class="card" style="position:relative;">
+  <h2>Bible Tools</h2>
+ 
+  <label>Translation</label>
+  <select id="version">
+    <option value="kjv">KJV (Public Domain)</option>
+    <option value="web" selected>WEB (Modern - No Copyright)</option>
+    <option value="asv">ASV (American Standard)</option>
+  </select>
+
+  <label>Book</label>
+  <div style="position:relative;">
+    <input id="bookInput" placeholder="Search Book..." oninput="filterBooks()" onclick="this.select()" autocomplete="off">
+    <span class="clear-x" onclick="bookInput.value=''; bookInput.focus();">✕</span>
+    <div class="book-list" id="bookList"></div>
+  </div>
+
+  <div class="row">
+    <div><label>Ch</label><input id="chapter" type="number" value="1"></div>
+    <div><label>From</label><input id="verseFrom" type="number" value="1"></div>
+    <div><label>To</label><input id="verseTo" type="number" value="1"></div>
+  </div>
+
+  <div class="row">
+    <button style="background:transparent; color:var(--primary); border:2px solid var(--primary);" onclick="addRef()">Add Ref</button>
+    <button onclick="addRefVerse()">Add Ref + Verse</button>
+  </div>
+  <button style="background:var(--primary-light)" onclick="previewVerse()">Preview Verse (Alt+P)</button>
+</div>
+
+<div class="card">
+  <h2>Speech Notes</h2>
+  <textarea id="notes" placeholder="Start your sermon outline..."></textarea>
+
+  <div class="row">
+    <button style="background:#0277bd;" onclick="copyNotes()">📋 Copy</button>
+    <button style="background:#444;" onclick="exportPDF()">📄 PDF</button>
+    <button style="background:var(--success);" onclick="sendEmail()">📧 Email</button>
+  </div>
+
+  <button style="background:transparent; color:#a30000; border:1px solid #a30000; margin-top:10px;" onclick="resetAll()">Reset All Fields</button>
+</div>
+
+</div>
+
+<div id="popup" onclick="closePopup()">
+  <div class="popup-content" onclick="event.stopPropagation()">
+    <h3 id="popupRef" style="margin-top:0"></h3>
+    <textarea id="popupVerse" readonly style="min-height:200px; background:#f9f9f9;"></textarea>
+    <button onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<script>
+const books=["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
+const sep="----------------------------";
+
+date.valueAsDate=new Date();
+
+(function restore(){
+  const d=JSON.parse(localStorage.getItem("churchNotes_pro")||"{}");
+  if(d.date)date.value=d.date;
+  if(d.subject)subject.value=d.subject;
+  if(d.notes)notes.value=d.notes;
+})();
+
+setInterval(() => {
+  localStorage.setItem("churchNotes_pro", JSON.stringify({date:date.value, subject:subject.value, notes:notes.value}));
+}, 5000);
+
+function filterBooks(){
+  bookList.innerHTML="";
+  const q=bookInput.value.toLowerCase();
+  if(!q){bookList.style.display="none";return;}
+  books.filter(b=>b.toLowerCase().includes(q)).forEach(b=>{
+    const d=document.createElement("div");
+    d.className="book-item"; d.textContent=b;
+    d.onclick=()=>{bookInput.value=b;bookList.style.display="none";}
+    bookList.appendChild(d);
+  });
+  bookList.style.display="block";
+}
+
+function refText(){
+  return `$%7BbookInput.value%7D $%7Bchapter.value%7D:$%7BverseFrom.value%7D-$%7BverseTo.value%7D`;
+}
+
+function addRef(){
+  if(!bookInput.value) return;
+  const vName = version.value.toUpperCase();
+  notes.value+=`\n$%7Bsep%7D\n📖 $%7BrefText()%7D ($%7BvName%7D)\n$%7Bsep%7D\n`;
+  focusNotes();
+}
+
+async function addRefVerse(){
+  if(!bookInput.value) return;
+  const r=refText();
+  const v=version.value;
+  try {
+    const res=await fetch(`https://bible-api.com/$%7BencodeURIComponent(r)%7D?translation=$%7Bv%7D`);
+    const d=await res.json();
+    notes.value+=`\n$%7Bsep%7D\n📖 $%7Br%7D ($%7Bv.toUpperCase()%7D)\n\n$%7Bd.text||""%7D\n$%7Bsep%7D\n`;
+    focusNotes();
+  } catch(e){ alert("Check internet connection"); }
+}
+
+async function previewVerse(){
+  if(!bookInput.value)return;
+  popup.style.display="block";
+  popupRef.textContent=refText() + " (" + version.value.toUpperCase() + ")";
+  popupVerse.value="Loading...";
+  const res=await fetch(`https://bible-api.com/$%7BencodeURIComponent(refText())%7D?translation=$%7Bversion.value%7D`);
+  const d=await res.json();
+  popupVerse.value=d.text||"Not found";
+}
+
+function closePopup(){popup.style.display="none";}
+function copyNotes(){notes.select();document.execCommand("copy"); alert("Copied!");}
+function exportPDF(){window.print();}
+function sendEmail(){
+  location.href=`mailto:gospel4mathew@gmail.com?subject=$%7BencodeURIComponent(subject.value||"Notes")%7D&body=$%7BencodeURIComponent(notes.value)%7D`;
+}
+function resetAll(){if(confirm("Clear all data?")){localStorage.removeItem("churchNotes_pro");location.reload();}}
+function focusNotes(){
+  notes.focus();
+  notes.scrollTop = notes.scrollHeight;
+  notes.selectionStart = notes.selectionEnd = notes.value.length;
+}
+
+document.addEventListener("keydown",e=>{
+  if(!e.altKey)return;
+  if(e.key==="r")addRef();
+  if(e.key==="v")addRefVerse();
+  if(e.key==="p")previewVerse();
+  if(e.key==="c")copyNotes();
+});
+</script>
+</body>
+</html>
