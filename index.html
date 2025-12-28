@@ -103,7 +103,7 @@ button:active { opacity: 0.8; }
 
 <div class="card" style="position:relative;">
   <h2>Bible Tools</h2>
- 
+  
   <label>Translation</label>
   <select id="version">
     <option value="kjv">KJV (Public Domain)</option>
@@ -185,13 +185,13 @@ function filterBooks(){
 }
 
 function refText(){
-  return `$%7BbookInput.value%7D $%7Bchapter.value%7D:$%7BverseFrom.value%7D-$%7BverseTo.value%7D`;
+  return `${bookInput.value} ${chapter.value}:${verseFrom.value}-${verseTo.value}`;
 }
 
 function addRef(){
   if(!bookInput.value) return;
   const vName = version.value.toUpperCase();
-  notes.value+=`\n$%7Bsep%7D\n📖 $%7BrefText()%7D ($%7BvName%7D)\n$%7Bsep%7D\n`;
+  notes.value+=`\n${sep}\n📖 ${refText()} (${vName})\n${sep}\n`;
   focusNotes();
 }
 
@@ -200,9 +200,9 @@ async function addRefVerse(){
   const r=refText();
   const v=version.value;
   try {
-    const res=await fetch(`https://bible-api.com/$%7BencodeURIComponent(r)%7D?translation=$%7Bv%7D`);
+    const res=await fetch(`https://bible-api.com/${encodeURIComponent(r)}?translation=${v}`);
     const d=await res.json();
-    notes.value+=`\n$%7Bsep%7D\n📖 $%7Br%7D ($%7Bv.toUpperCase()%7D)\n\n$%7Bd.text||""%7D\n$%7Bsep%7D\n`;
+    notes.value+=`\n${sep}\n📖 ${r} (${v.toUpperCase()})\n\n${d.text||""}\n${sep}\n`;
     focusNotes();
   } catch(e){ alert("Check internet connection"); }
 }
@@ -212,7 +212,7 @@ async function previewVerse(){
   popup.style.display="block";
   popupRef.textContent=refText() + " (" + version.value.toUpperCase() + ")";
   popupVerse.value="Loading...";
-  const res=await fetch(`https://bible-api.com/$%7BencodeURIComponent(refText())%7D?translation=$%7Bversion.value%7D`);
+  const res=await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
   const d=await res.json();
   popupVerse.value=d.text||"Not found";
 }
@@ -221,7 +221,7 @@ function closePopup(){popup.style.display="none";}
 function copyNotes(){notes.select();document.execCommand("copy"); alert("Copied!");}
 function exportPDF(){window.print();}
 function sendEmail(){
-  location.href=`mailto:gospel4mathew@gmail.com?subject=$%7BencodeURIComponent(subject.value||"Notes")%7D&body=$%7BencodeURIComponent(notes.value)%7D`;
+  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(subject.value||"Notes")}&body=${encodeURIComponent(notes.value)}`;
 }
 function resetAll(){if(confirm("Clear all data?")){localStorage.removeItem("churchNotes_pro");location.reload();}}
 function focusNotes(){
