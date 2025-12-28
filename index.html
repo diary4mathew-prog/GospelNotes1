@@ -160,6 +160,7 @@ const sep="----------------------------";
 
 date.valueAsDate=new Date();
 
+// --- Restore Data ---
 (function restore(){
   const d=JSON.parse(localStorage.getItem("churchNotes_pro")||"{}");
   if(d.date)date.value=d.date;
@@ -167,6 +168,7 @@ date.valueAsDate=new Date();
   if(d.notes)notes.value=d.notes;
 })();
 
+// --- Auto Save ---
 setInterval(() => {
   localStorage.setItem("churchNotes_pro", JSON.stringify({date:date.value, subject:subject.value, notes:notes.value}));
 }, 5000);
@@ -191,18 +193,19 @@ function refText(){
 function addRef(){
   if(!bookInput.value) return;
   const vName = version.value.toUpperCase();
-  notes.value+=`\n${sep}\n📖 ${refText()} (${vName})\n${sep}\n`;
+  notes.value += `\n${sep}\n📖 ${refText()} (${vName})\n${sep}\n`;
   focusNotes();
 }
 
 async function addRefVerse(){
   if(!bookInput.value) return;
-  const r=refText();
-  const v=version.value;
+  const r = refText();
+  const v = version.value;
   try {
-    const res=await fetch(`https://bible-api.com/${encodeURIComponent(r)}?translation=${v}`);
-    const d=await res.json();
-    notes.value+=`\n${sep}\n📖 ${r} (${v.toUpperCase()})\n\n${d.text||""}\n${sep}\n`;
+    const res = await fetch(`https://bible-api.com/${encodeURIComponent(r)}?translation=${v}`);
+    const d = await res.json();
+    // Using backticks here correctly
+    notes.value += `\n${sep}\n📖 ${r} (${v.toUpperCase()})\n\n${d.text || ""}\n${sep}\n`;
     focusNotes();
   } catch(e){ alert("Check internet connection"); }
 }
@@ -210,26 +213,31 @@ async function addRefVerse(){
 async function previewVerse(){
   if(!bookInput.value)return;
   popup.style.display="block";
-  popupRef.textContent=refText() + " (" + version.value.toUpperCase() + ")";
-  popupVerse.value="Loading...";
-  const res=await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
-  const d=await res.json();
-  popupVerse.value=d.text||"Not found";
+  popupRef.textContent = refText() + " (" + version.value.toUpperCase() + ")";
+  popupVerse.value = "Loading...";
+  try {
+    const res = await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
+    const d = await res.json();
+    popupVerse.value = d.text || "Not found";
+  } catch(e) { popupVerse.value = "Error loading verse."; }
 }
 
 function closePopup(){popup.style.display="none";}
-function copyNotes(){notes.select();document.execCommand("copy"); alert("Copied!");}
+function copyNotes(){notes.select();document.execCommand("copy"); alert("Copied to clipboard!");}
 function exportPDF(){window.print();}
 function sendEmail(){
-  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(subject.value||"Notes")}&body=${encodeURIComponent(notes.value)}`;
+  const bodyText = notes.value;
+  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(subject.value||"Notes")}&body=${encodeURIComponent(bodyText)}`;
 }
 function resetAll(){if(confirm("Clear all data?")){localStorage.removeItem("churchNotes_pro");location.reload();}}
+
 function focusNotes(){
   notes.focus();
   notes.scrollTop = notes.scrollHeight;
   notes.selectionStart = notes.selectionEnd = notes.value.length;
 }
 
+// --- Keyboard Shortcuts ---
 document.addEventListener("keydown",e=>{
   if(!e.altKey)return;
   if(e.key==="r")addRef();
