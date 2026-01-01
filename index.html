@@ -1,40 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sermon Notes Library</title>
 <style>
-  :root { --primary:#6b4f3f; --primary-light:#8a6d5a; --bg:#f2ede4; --card:#ffffff; --border:#d1c7bc; --success:#2e7d32; --error:#d32f2f; }
-  body { margin:0; padding:15px; font-family:'Segoe UI', sans-serif; background:var(--bg); display:flex; justify-content:center; }
-  .container { max-width:600px; width:100%; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:18px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
-  h2 { margin:0 0 10px 0; font-size:1rem; color:var(--primary); text-transform:uppercase; letter-spacing:1px; }
-  label { font-size:.75rem; font-weight:600; color:#777; display:block; margin-bottom:4px; }
-  .cap-text { font-size:0.7rem; color:var(--primary-light); font-weight:bold; margin-top:4px; display:block; }
-  input, textarea, select, button { width:100%; box-sizing:border-box; padding:12px; margin-top:4px; margin-bottom:12px; font-size:16px; border-radius:8px; border:1px solid var(--border); outline:none; }
-  input.invalid { border-color:var(--error); background:#fff8f8; animation:shake 0.2s ease-in-out 0s 2; }
-  @keyframes shake { 0%, 100% { transform:translateX(0); } 25% { transform:translateX(3px); } 75% { transform:translateX(-3px); } }
-  textarea { min-height:350px; resize:vertical; line-height:1.5; font-family:inherit; }
-  .row { display:flex; gap:10px; }
-  button { background:var(--primary); color:#fff; border:none; font-weight:bold; cursor:pointer; transition:0.2s; }
-  button:active { transform:scale(0.98); opacity:0.9; }
-  .tag-bar { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; background:#eee; padding:10px; border-radius:8px; }
-  .tag-bar button { width:auto; padding:8px 12px; font-size:13px; margin:0; background:#fff; color:#333; border:1px solid #ccc; flex-grow:1; }
-  .tag-bar button:active { background:var(--primary-light); color:white; }
-  .book-list { position:absolute; background:#fff; border:1px solid var(--border); max-height:180px; overflow-y:auto; width:100%; z-index:10; display:none; border-radius:8px; }
-  .book-item { padding:10px; cursor:pointer; border-bottom:1px solid #eee; }
-  .book-item:hover { background:#f6f3ef; font-weight:bold; }
-  .clear-x { position:absolute; right:12px; top:38px; cursor:pointer; color:#999; font-weight:bold; z-index:5; padding:5px; }
-  #popup { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:100; backdrop-filter:blur(2px); }
-  .popup-content { background:#fff; max-width:500px; margin:10% auto; padding:20px; border-radius:12px; position:relative; }
-  .note-stats { font-size:0.75rem; color:#777; text-align:right; margin-top:-8px; margin-bottom:8px; }
+  :root{
+    --primary:#6b4f3f;
+    --primary-light:#8a6d5a;
+    --bg:#f2ede4;
+    --card:#ffffff;
+    --border:#d1c7bc;
+    --success:#2e7d32;
+    --error:#d32f2f;
+    --text:#222222;
+    --muted:#777777;
+    --tag-bg:#eeeeee;
+  }
+  [data-theme="dark"]{
+    --primary:#d1b08a;
+    --primary-light:#f5d2a4;
+    --bg:#0b0f19;
+    --card:#161b26;
+    --border:#333c4f;
+    --success:#6fbf73;
+    --error:#ef5350;
+    --text:#e7eaf3;
+    --muted:#a6b1d6;
+    --tag-bg:#1f2633;
+  }
 
-  /* Floating round Bible button */
-  .jump-link{
+  body{
+    margin:0;
+    padding:15px;
+    font-family:'Segoe UI',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+  }
+  .container{max-width:600px;width:100%;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.05);
+  }
+  h2{
+    margin:0 0 10px 0;
+    font-size:1rem;
+    color:var(--primary);
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  label{
+    font-size:.75rem;
+    font-weight:600;
+    color:var(--muted);
+    display:block;
+    margin-bottom:4px;
+  }
+  .cap-text{
+    font-size:0.7rem;
+    color:var(--primary-light);
+    font-weight:bold;
+    margin-top:4px;
+    display:block;
+  }
+  input,textarea,select,button{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    margin-top:4px;
+    margin-bottom:12px;
+    font-size:16px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    outline:none;
+    background:#ffffff;
+  }
+  [data-theme="dark"] input,
+  [data-theme="dark"] textarea,
+  [data-theme="dark"] select,
+  [data-theme="dark"] button{
+    background:#202633;
+    color:var(--text);
+    border-color:var(--border);
+  }
+  textarea{
+    min-height:350px;
+    resize:vertical;
+    line-height:1.5;
+    font-family:inherit;
+  }
+  .row{display:flex;gap:10px;}
+  button{
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+  }
+  button:active{transform:scale(0.98);opacity:0.9;}
+  .tag-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-bottom:10px;
+    background:var(--tag-bg);
+    padding:10px;
+    border-radius:8px;
+  }
+  .tag-bar button{
+    width:auto;
+    padding:8px 12px;
+    font-size:13px;
+    margin:0;
+    background:#fff;
+    color:#333;
+    border:1px solid #ccc;
+    flex-grow:1;
+  }
+  [data-theme="dark"] .tag-bar button{
+    background:#202633;
+    color:var(--text);
+    border-color:var(--border);
+  }
+  .tag-bar button:active{
+    background:var(--primary-light);
+    color:#fff;
+  }
+  .book-list{
+    position:absolute;
+    background:#fff;
+    border:1px solid var(--border);
+    max-height:180px;
+    overflow-y:auto;
+    width:100%;
+    z-index:10;
+    display:none;
+    border-radius:8px;
+  }
+  [data-theme="dark"] .book-list{
+    background:#202633;
+    border-color:var(--border);
+  }
+  .book-item{
+    padding:10px;
+    cursor:pointer;
+    border-bottom:1px solid #eee;
+  }
+  [data-theme="dark"] .book-item{
+    border-bottom:1px solid #2a3243;
+  }
+  .book-item:hover{
+    background:#f6f3ef;
+    font-weight:bold;
+  }
+  [data-theme="dark"] .book-item:hover{
+    background:#252d3d;
+  }
+  .clear-x{
+    position:absolute;
+    right:12px;
+    top:38px;
+    cursor:pointer;
+    color:#999;
+    font-weight:bold;
+    z-index:5;
+    padding:5px;
+  }
+  #popup{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    z-index:100;
+    backdrop-filter:blur(2px);
+  }
+  .popup-content{
+    background:#fff;
+    max-width:500px;
+    margin:10% auto;
+    padding:20px;
+    border-radius:12px;
+    position:relative;
+  }
+  .note-stats{
+    font-size:0.75rem;
+    color:var(--muted);
+    text-align:right;
+    margin-top:-8px;
+    margin-bottom:8px;
+  }
+
+  /* Floating round Bible button (top of the pair) */
+  .jump-link,
+  .jump-notes{
     position:fixed;
     right:16px;
-    bottom:16px;
     width:48px;
     height:48px;
     border-radius:50%;
@@ -42,26 +209,56 @@
     color:#fff;
     border:none;
     font-size:20px;
-    font-weight:bold;
     display:flex;
     align-items:center;
     justify-content:center;
     box-shadow:0 3px 8px rgba(0,0,0,.35);
     cursor:pointer;
     z-index:50;
-    opacity:.92;
+    opacity:.85;
+    transition:opacity .2s,transform .1s,box-shadow .2s;
   }
-  .jump-link:hover{ opacity:1; }
-  .jump-link:active{ transform:scale(.96); }
-
+  .jump-link{bottom:100px;}   /* Bible button slightly higher */
+  .jump-notes{bottom:40px;}   /* Notes button nearer bottom */
+  .jump-link:hover,
+  .jump-notes:hover{
+    opacity:1;
+    box-shadow:0 4px 10px rgba(0,0,0,.45);
+  }
+  .jump-link:active,
+  .jump-notes:active{
+    transform:scale(.95);
+  }
   @media(max-width:480px){
-    .jump-link{
+    .jump-link,.jump-notes{
       width:42px;
       height:42px;
       font-size:18px;
       right:12px;
-      bottom:12px;
     }
+    .jump-link{bottom:90px;}
+    .jump-notes{bottom:30px;}
+  }
+
+  /* Theme toggle button */
+  .theme-toggle{
+    position:fixed;
+    top:10px;
+    right:16px;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:var(--card);
+    color:var(--primary);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    cursor:pointer;
+    z-index:60;
+    padding:0;
   }
 </style>
 </head>
@@ -75,25 +272,43 @@
     </div>
   </div>
 
-  <!-- Bible Tools card with ID so the button can scroll here -->
+  <!-- Bible Tools card -->
   <div class="card" id="bibleTools" style="position:relative;">
     <h2>Bible Tools</h2>
     <div class="row">
-        <div style="flex: 2;"><label>Book</label>
-            <div style="position:relative;">
-              <input id="bookInput" placeholder="Search..." oninput="filterBooks()" onclick="this.select()" autocomplete="off">
-              <span class="clear-x" onclick="clearBook()">✕</span>
-              <div class="book-list" id="bookList"></div>
-            </div>
+      <div style="flex: 2;">
+        <label>Book</label>
+        <div style="position:relative;">
+          <input id="bookInput" placeholder="Search..." oninput="filterBooks()" onclick="this.select()" autocomplete="off">
+          <span class="clear-x" onclick="clearBook()">✕</span>
+          <div class="book-list" id="bookList"></div>
         </div>
-        <div style="flex: 1;"><label>Version</label>
-            <select id="version"><option value="web" selected>WEB</option><option value="kjv">KJV</option><option value="asv">ASV</option></select>
-        </div>
+      </div>
+      <div style="flex: 1;">
+        <label>Version</label>
+        <select id="version">
+          <option value="web" selected>WEB</option>
+          <option value="kjv">KJV</option>
+          <option value="asv">ASV</option>
+        </select>
+      </div>
     </div>
     <div class="row">
-      <div style="flex:1"><label>Ch</label><input id="chapter" type="number" value="1" oninput="updateVerseLimit();"><span id="chCap" class="cap-text">-- Chs</span></div>
-      <div style="flex:1"><label>From</label><input id="verseFrom" type="number" value="1" oninput="syncVerseTo();"><span id="vCap" class="cap-text">-- Max</span></div>
-      <div style="flex:1"><label>To</label><input id="verseTo" type="number" value="1"><span style="visibility:hidden" class="cap-text">.</span></div>
+      <div style="flex:1">
+        <label>Ch</label>
+        <input id="chapter" type="number" value="1" oninput="updateVerseLimit();">
+        <span id="chCap" class="cap-text">-- Chs</span>
+      </div>
+      <div style="flex:1">
+        <label>From</label>
+        <input id="verseFrom" type="number" value="1" oninput="syncVerseTo();">
+        <span id="vCap" class="cap-text">-- Max</span>
+      </div>
+      <div style="flex:1">
+        <label>To</label>
+        <input id="verseTo" type="number" value="1">
+        <span style="visibility:hidden" class="cap-text">.</span>
+      </div>
     </div>
     <div class="row">
       <button type="button" style="background:transparent; color:var(--primary); border:2px solid var(--primary);" onclick="addRef()">Ref Only</button>
@@ -102,6 +317,7 @@
     </div>
   </div>
 
+  <!-- Notes -->
   <div class="card">
     <h2>Notes</h2>
     <div class="tag-bar">
@@ -121,9 +337,14 @@
     <button type="button" style="background:transparent; color:#a30000; border:1px solid #a30000; margin-top:10px;" onclick="resetAll()">Reset Page</button>
   </div>
 
-  <!-- Floating round button to jump to Bible Tools -->
+  <!-- Floating round buttons -->
   <button type="button" class="jump-link" onclick="goToBibleTools()">📖</button>
+  <button type="button" class="jump-notes" onclick="goBackToNotes()">✍️</button>
+
 </div>
+
+<!-- Theme toggle -->
+<button type="button" id="themeToggle" class="theme-toggle" onclick="toggleTheme()">🌙</button>
 
 <div id="popup" onclick="closePopup()">
   <div class="popup-content" onclick="event.stopPropagation()">
@@ -135,12 +356,103 @@
 
 <script>
 const STORE_KEY = "church_archivist_final_v14";
-const bibleData = {"Genesis":[50,31,25,24,26,32,22,24,22,29,32,32,20,18,24,21,16,27,33,38,18,34,24,20,67,34,35,46,35,43,55,54,33,20,31,29,43,36,30,23,23,57,38,34,34,28,34,31,22,33,26],"Exodus":[40,22,25,22,31,30,30,25,32,35,32,29,51,22,22,27,21,16,27,25,26,36,31,33,18,40,37,21,43,46,38,18,35,23,35,35,38,29,31,43,38],"Leviticus":[27,17,16,17,35,19,30,38,36,24,20,47,8,59,57,33,34,16,30,37,27,24,33,44,23,55,46,34],"Numbers":[36,54,34,51,49,31,27,89,26,23,36,35,16,33,45,41,50,13,32,22,29,35,41,25,18,15,65,23,31,31,16,54,42,56,29,34,13],"Deuteronomy":[34,46,37,29,49,25,25,26,20,29,22,32,32,18,29,22,20,22,22,21,20,23,30,22,25,19,26,68,29,20,30,20,52,12,12],"Joshua":[24,18,24,17,24,15,27,26,35,27,43,23,24,33,14,63,10,28,11,51,9,45,34,16,33],"Judges":[21,36,23,31,24,31,40,32,35,57,18,40,15,25,20,31,31,31,31,30,48,25],"Ruth":[4,22,23,18,22],"1 Samuel":[31,28,36,21,22,21,21,17,22,27,27,15,25,23,52,35,23,58,30,24,42,15,23,28,22,44,25,12,25,11,31,13],"2 Samuel":[24,27,32,39,12,25,23,29,18,13,19,27,31,39,33,37,23,33,33,43,26,22,51,39,25],"1 Kings":[22,53,46,28,34,18,38,51,66,28,29,43,33,34,31,34,34,24,46,21,43,29,53],"2 Kings":[25,18,25,27,44,27,33,20,29,15,36,21,21,25,27,38,20,41,37,37,21,26,20,37,20,30],"1 Chronicles":[29,54,55,24,43,26,81,40,40,44,14,47,40,14,17,29,43,27,17,19,12,30,23,32,31,31,32,34,21,30],"2 Chronicles":[36,17,18,17,22,15,42,22,18,31,12,23,16,22,15,19,14,19,34,11,37,20,12,16,28,28,23,9,27,36,27,21,33,25,33,22,23],"Ezra":[10,11,70,13,24,17,22,28,36,15,44],"Nehemiah":[13,11,20,32,23,19,19,73,18,38,40,31,47,31],"Esther":[10,22,23,15,14,14,10,14,17,32,3],"Job":[42,22,13,26,21,27,30,21,22,35,22,20,25,28,22,35,22,16,21,29,29,34,30,17,25,6,14,23,28,35,31,40,22,33,37,13,33,24,41,30,24,34,17],"Psalms":[150,6,12,8,8,12,10,17,9,20,18,7,8,6,7,5,11,15,50,9,9,13,31,6,10,22,12,14,9,11,12,24,11,22,22,28,12,40,22,13,17,13,11,5,26,17,11,9,14,20,23,19,9,6,7,23,13,11,11,17,12,8,12,11,10,13,20,7,35,36,5,24,20,28,23,10,12,20,72,13,19,8,18,12,18,17,7,12,52,17,16,15,5,23,11,13,12,9,9,5,8,28,22,35,45,48,43,13,31,7,10,10,9,8,18,19,2,29,176,7,8,9,4,8,5,6,5,6,8,8,3,18,3,3,21,26,9,8,24,13,10,7,12,15,21,10,20,14,9,6],"Proverbs":[31,33,22,35,27,23,35,27,36,18,32,31,28,25,35,33,33,24,24,30,30,31,29,34,28,28,27,28,27,33,33,31],"Ecclesiastes":[12,18,26,22,16,20,12,29,17,18,20,10,14],"Song of Solomon":[8,17,17,11,16,16,13,13,14],"Isaiah":[66,31,22,26,6,30,13,25,22,21,34,16,6,22,32,9,14,7,7,25,17,17,25,18,23,12,21,13,29,24,33,9,24,17,10,22,38,22,8,31,29,31,44,28,13,25,15,22,26,11,23,15,12,17,13,11,21,14,21,22,11,12,19,12,25,24],"Jeremiah":[52,19,37,25,31,31,28,34,22,25,25,23,17,27,22,21,21,27,18,23,14,14,30,40,10,38,22,22,32,31,11,44,26,22,11,26,23,28,28,43,16,18,22,13,30,5,28,7,47,39,46,64,34],"Lamentations":[5,22,22,66,22,22],"Ezekiel":[48,28,10,27,17,17,14,27,18,11,22,25,28,23,23,8,63,32,32,14,49,32,31,49,27,17,21,36,26,21,26,32,32,33,30,15,38,28,23,38,26,20,26,31,4,26,10,35,35],"Daniel":[12,21,49,30,37,31,28,28,27,27,21,45,13],"Hosea":[14,11,23,5,19,15,11,16,14,17,15,12,14,16,15],"Joel":[3,20,32,21],"Amos":[9,15,16,15,13,27,14,17,14,15],"Obadiah":[1,21],"Jonah":[4,17,10,11,11],"Micah":[7,16,13,12,13,15,16,20],"Nahum":[3,15,13,19],"Habakkuk":[3,17,20,19],"Zephaniah":[3,18,15,20],"Haggai":[2,15,23],"Zechariah":[14,21,13,10,14,15,15,23,23,17,12,17,14,9,21],"Malachi":[4,14,17,18,6],"Matthew":[28,25,23,17,25,48,34,29,34,38,42,30,50,58,36,39,28,27,35,30,34,46,39,51,46,75,66,20],"Mark":[16,45,28,35,41,43,56,37,38,50,52,33,44,37,72,47,20],"Luke":[24,80,52,38,44,35,49,50,56,62,54,49,59,35,35,32,31,37,43,48,47,38,71,56,53],"John":[21,51,25,36,54,47,71,53,59,41,42,57,50,38,26,27,33,26,40,42,31,25],"Acts":[28,26,47,26,37,42,15,60,40,43,48,30,25,52,28,41,40,34,28,41,40,30,35,27,27,32,31,44,31],"Romans":[16,32,29,31,25,21,23,25,39,33,21,36,21,14,23,33,27],"1 Corinthians":[16,31,16,23,21,13,20,40,13,27,33,34,31,13,40,58,24],"2 Corinthians":[13,24,17,18,18,21,18,17,24,15,18,33,21,14],"Galatians":[6,24,21,31,31,26,18],"Ephesians":[6,23,22,21,32,33,24],"Philippians":[4,30,30,21,23],"Colossians":[4,29,23,25,18],"1 Thessalonians":[5,10,20,13,18,28],"2 Thessalonians":[3,12,17,18],"1 Timothy":[6,20,15,16,16,25,21],"2 Timothy":[4,18,26,17,22],"Titus":[3,16,15,15],"Philemon":[1,25],"Hebrews":[13,14,18,19,16,14,20,28,13,28,39,40,29,25],"James":[5,27,26,18,17,20],"1 Peter":[5,25,25,22,19,14],"2 Peter":[3,21,22,18],"1 John":[5,10,29,24,21,21],"2 John":[1,13],"3 John":[1,14],"Jude":[1,25],"Revelation":[22,20,29,22,11,14,17,17,13,21,11,19,17,18,20,8,21,24,18,21,15,21,21]};
+const THEME_KEY = "sermon_theme";
+const bibleData = {/* SAME bibleData AS YOUR PREVIOUS VERSION, KEEP IT HERE */ 
+"Genesis":[50,31,25,24,26,32,22,24,22,29,32,32,20,18,24,21,16,27,33,38,18,34,24,20,67,34,35,46,35,43,55,54,33,20,31,29,43,36,30,23,23,57,38,34,34,28,34,31,22,33,26],
+"Exodus":[40,22,25,22,31,30,30,25,32,35,32,29,51,22,22,27,21,16,27,25,26,36,31,33,18,40,37,21,43,46,38,18,35,23,35,35,38,29,31,43,38],
+"Leviticus":[27,17,16,17,35,19,30,38,36,24,20,47,8,59,57,33,34,16,30,37,27,24,33,44,23,55,46,34],
+"Numbers":[36,54,34,51,49,31,27,89,26,23,36,35,16,33,45,41,50,13,32,22,29,35,41,25,18,15,65,23,31,31,16,54,42,56,29,34,13],
+"Deuteronomy":[34,46,37,29,49,25,25,26,20,29,22,32,32,18,29,22,20,22,22,21,20,23,30,22,25,19,26,68,29,20,30,20,52,12,12],
+"Joshua":[24,18,24,17,24,15,27,26,35,27,43,23,24,33,14,63,10,28,11,51,9,45,34,16,33],
+"Judges":[21,36,23,31,24,31,40,32,35,57,18,40,15,25,20,31,31,31,31,30,48,25],
+"Ruth":[4,22,23,18,22],
+"1 Samuel":[31,28,36,21,22,21,21,17,22,27,27,15,25,23,52,35,23,58,30,24,42,15,23,28,22,44,25,12,25,11,31,13],
+"2 Samuel":[24,27,32,39,12,25,23,29,18,13,19,27,31,39,33,37,23,33,33,43,26,22,51,39,25],
+"1 Kings":[22,53,46,28,34,18,38,51,66,28,29,43,33,34,31,34,34,24,46,21,43,29,53],
+"2 Kings":[25,18,25,27,44,27,33,20,29,15,36,21,21,25,27,38,20,41,37,37,21,26,20,37,20,30],
+"1 Chronicles":[29,54,55,24,43,26,81,40,40,44,14,47,40,14,17,29,43,27,17,19,12,30,23,32,31,31,32,34,21,30],
+"2 Chronicles":[36,17,18,17,22,15,42,22,18,31,12,23,16,22,15,19,14,19,34,11,37,20,12,16,28,28,23,9,27,36,27,21,33,25,33,22,23],
+"Ezra":[10,11,70,13,24,17,22,28,36,15,44],
+"Nehemiah":[13,11,20,32,23,19,19,73,18,38,40,31,47,31],
+"Esther":[10,22,23,15,14,14,10,14,17,32,3],
+"Job":[42,22,13,26,21,27,30,21,22,35,22,20,25,28,22,35,22,16,21,29,29,34,30,17,25,6,14,23,28,35,31,40,22,33,37,13,33,24,41,30,24,34,17],
+"Psalms":[150,6,12,8,8,12,10,17,9,20,18,7,8,6,7,5,11,15,50,9,9,13,31,6,10,22,12,14,9,11,12,24,11,22,22,28,12,40,22,13,17,13,11,5,26,17,11,9,14,20,23,19,9,6,7,23,13,11,11,17,12,8,12,11,10,13,20,7,35,36,5,24,20,28,23,10,12,20,72,13,19,8,18,12,18,17,7,12,52,17,16,15,5,23,11,13,12,9,9,5,8,28,22,35,45,48,43,13,31,7,10,10,9,8,18,19,2,29,176,7,8,9,4,8,5,6,5,6,8,8,3,18,3,3,21,26,9,8,24,13,10,7,12,15,21,10,20,14,9,6],
+"Proverbs":[31,33,22,35,27,23,35,27,36,18,32,31,28,25,35,33,33,24,24,30,30,31,29,34,28,28,27,28,27,33,33,31],
+"Ecclesiastes":[12,18,26,22,16,20,12,29,17,18,20,10,14],
+"Song of Solomon":[8,17,17,11,16,16,13,13,14],
+"Isaiah":[66,31,22,26,6,30,13,25,22,21,34,16,6,22,32,9,14,7,7,25,17,17,25,18,23,12,21,13,29,24,33,9,24,17,10,22,38,22,8,31,29,31,44,28,13,25,15,22,26,11,23,15,12,17,13,11,21,14,21,22,11,12,19,12,25,24],
+"Jeremiah":[52,19,37,25,31,31,28,34,22,25,25,23,17,27,22,21,21,27,18,23,14,14,30,40,10,38,22,22,32,31,11,44,26,22,11,26,23,28,28,43,16,18,22,13,30,5,28,7,47,39,46,64,34],
+"Lamentations":[5,22,22,66,22,22],
+"Ezekiel":[48,28,10,27,17,17,14,27,18,11,22,25,28,23,23,8,63,32,32,14,49,32,31,49,27,17,21,36,26,21,26,32,32,33,30,15,38,28,23,38,26,20,26,31,4,26,10,35,35],
+"Daniel":[12,21,49,30,37,31,28,28,27,27,21,45,13],
+"Hosea":[14,11,23,5,19,15,11,16,14,17,15,12,14,16,15],
+"Joel":[3,20,32,21],
+"Amos":[9,15,16,15,13,27,14,17,14,15],
+"Obadiah":[1,21],
+"Jonah":[4,17,10,11,11],
+"Micah":[7,16,13,12,13,15,16,20],
+"Nahum":[3,15,13,19],
+"Habakkuk":[3,17,20,19],
+"Zephaniah":[3,18,15,20],
+"Haggai":[2,15,23],
+"Zechariah":[14,21,13,10,14,15,15,23,23,17,12,17,14,9,21],
+"Malachi":[4,14,17,18,6],
+"Matthew":[28,25,23,17,25,48,34,29,34,38,42,30,50,58,36,39,28,27,35,30,34,46,39,51,46,75,66,20],
+"Mark":[16,45,28,35,41,43,56,37,38,50,52,33,44,37,72,47,20],
+"Luke":[24,80,52,38,44,35,49,50,56,62,54,49,59,35,35,32,31,37,43,48,47,38,71,56,53],
+"John":[21,51,25,36,54,47,71,53,59,41,42,57,50,38,26,27,33,26,40,42,31,25],
+"Acts":[28,26,47,26,37,42,15,60,40,43,48,30,25,52,28,41,40,34,28,41,40,30,35,27,27,32,31,44,31],
+"Romans":[16,32,29,31,25,21,23,25,39,33,21,36,21,14,23,33,27],
+"1 Corinthians":[16,31,16,23,21,13,20,40,13,27,33,34,31,13,40,58,24],
+"2 Corinthians":[13,24,17,18,18,21,18,17,24,15,18,33,21,14],
+"Galatians":[6,24,21,31,31,26,18],
+"Ephesians":[6,23,22,21,32,33,24],
+"Philippians":[4,30,30,21,23],
+"Colossians":[4,29,23,25,18],
+"1 Thessalonians":[5,10,20,13,18,28],
+"2 Thessalonians":[3,12,17,18],
+"1 Timothy":[6,20,15,16,16,25,21],
+"2 Timothy":[4,18,26,17,22],
+"Titus":[3,16,15,15],
+"Philemon":[1,25],
+"Hebrews":[13,14,18,19,16,14,20,28,13,28,39,40,29,25],
+"James":[5,27,26,18,17,20],
+"1 Peter":[5,25,25,22,19,14],
+"2 Peter":[3,21,22,18],
+"1 John":[5,10,29,24,21,21],
+"2 John":[1,13],
+"3 John":[1,14],
+"Jude":[1,25],
+"Revelation":[22,20,29,22,11,14,17,17,13,21,11,19,17,18,20,8,21,24,18,21,15,21,21]
+};
+
 const books = Object.keys(bibleData);
 const sep="----------------------------";
 
 date.valueAsDate=new Date();
 
+/* THEME */
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
+  const tBtn=document.getElementById('themeToggle');
+  if(tBtn) tBtn.textContent = theme==='dark' ? '☀️' : '🌙';
+}
+(function initTheme(){
+  const stored = localStorage.getItem(THEME_KEY);
+  let theme = stored;
+  if(!theme){
+    theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  applyTheme(theme);
+})();
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme')==='dark' ? 'dark':'light';
+  const next = current==='dark' ? 'light':'dark';
+  applyTheme(next);
+  localStorage.setItem(THEME_KEY,next);
+}
+
+/* RESTORE */
 (function restore(){
   const d=JSON.parse(localStorage.getItem(STORE_KEY)||"{}");
   if(d.date) date.value=d.date;
@@ -149,145 +461,225 @@ date.valueAsDate=new Date();
   updateNoteStats();
 })();
 
-function save() {
+function save(){
   localStorage.setItem(STORE_KEY, JSON.stringify({
     date:date.value, subject:subject.value, notes:notes.value
   }));
 }
-setInterval(save, 5000);
+setInterval(save,5000);
 
-function updateNoteStats() {
+function updateNoteStats(){
   const text = notes.value || "";
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   const lines = text ? text.split('\n').length : 0;
   document.getElementById('noteStats').textContent = `${words} words · ${lines} lines`;
 }
 
+/* BIBLE TOOLS */
 function filterBooks(){
-  bookList.innerHTML=""; const q=bookInput.value.toLowerCase();
+  bookList.innerHTML="";
+  const q=bookInput.value.toLowerCase();
   if(!q){bookList.style.display="none";return;}
   books.filter(b => b.toLowerCase().includes(q)).forEach(b=>{
-    const d=document.createElement("div"); d.className="book-item"; d.textContent=b;
-    d.onclick=()=>{ selectBook(b); }; bookList.appendChild(d);
+    const d=document.createElement("div");
+    d.className="book-item";
+    d.textContent=b;
+    d.onclick=()=>{ selectBook(b); };
+    bookList.appendChild(d);
   });
   bookList.style.display="block";
 }
-
-function selectBook(b) {
-    bookInput.value = b; bookList.style.display = "none";
-    const totalCh = bibleData[b][0];
-    document.getElementById('chCap').textContent = `${totalCh} Chs`;
-    document.getElementById('chapter').max = totalCh; updateVerseLimit();
+function selectBook(b){
+  bookInput.value=b;
+  bookList.style.display="none";
+  const totalCh=bibleData[b][0];
+  chCap.textContent=`${totalCh} Chs`;
+  chapter.max=totalCh;
+  updateVerseLimit();
 }
-
-function updateVerseLimit() {
-    const b = bookInput.value; const ch = parseInt(document.getElementById('chapter').value) || 1;
-    if(bibleData[b]) {
-        const vMax = bibleData[b][ch] || 1;
-        document.getElementById('vCap').textContent = `${vMax} Max`;
-        document.getElementById('verseFrom').max = vMax; document.getElementById('verseTo').max = vMax;
-    }
+function updateVerseLimit(){
+  const b=bookInput.value;
+  const ch=parseInt(chapter.value)||1;
+  if(bibleData[b]){
+    const vMax=bibleData[b][ch]||1;
+    vCap.textContent=`${vMax} Max`;
+    verseFrom.max=vMax;
+    verseTo.max=vMax;
+  }
 }
-
-function syncVerseTo() {
-    const fromVal = parseInt(verseFrom.value);
-    const toVal = parseInt(verseTo.value);
-    if (fromVal > toVal) verseTo.value = fromVal;
+function syncVerseTo(){
+  const fromVal=parseInt(verseFrom.value);
+  const toVal=parseInt(verseTo.value);
+  if(fromVal>toVal) verseTo.value=fromVal;
 }
-
-function clearBook() { bookInput.value=''; document.getElementById('chCap').textContent='-- Chs'; document.getElementById('vCap').textContent='-- Max'; bookInput.focus(); }
-
-function refText(){ 
-    const f = parseInt(verseFrom.value);
-    const t = parseInt(verseTo.value);
-    const finalTo = t < f ? f : t;
-    return `${bookInput.value} ${chapter.value}:${f}-${finalTo}`; 
+function clearBook(){
+  bookInput.value='';
+  chCap.textContent='-- Chs';
+  vCap.textContent='-- Max';
+  bookList.style.display="none";
+  bookInput.focus();
 }
-
-function insertAtCursor(text) {
-    const start = notes.selectionStart;
-    const end = notes.selectionEnd;
-    notes.value = notes.value.substring(0, start) + text + notes.value.substring(end);
-    notes.selectionStart = notes.selectionEnd = start + text.length;
-    notes.focus(); save(); updateNoteStats();
+function refText(){
+  const f=parseInt(verseFrom.value);
+  const t=parseInt(verseTo.value);
+  const finalTo=t<f?f:t;
+  return `${bookInput.value} ${chapter.value}:${f}-${finalTo}`;
 }
-
+function insertAtCursor(text){
+  const start=notes.selectionStart;
+  const end=notes.selectionEnd;
+  notes.value = notes.value.substring(0,start) + text + notes.value.substring(end);
+  notes.selectionStart=notes.selectionEnd=start+text.length;
+  notes.focus();
+  rememberNoteState();
+  save();
+  updateNoteStats();
+}
 function addRef(){
   if(!bookInput.value) return;
   insertAtCursor(`\n${sep}\n📖 ${refText()} (${version.value.toUpperCase()})\n${sep}\n`);
 }
-
 async function addRefVerse(btn){
-  if(!bookInput.value) return; 
-  const oldTxt = btn.textContent; btn.textContent="...";
-  try {
+  if(!bookInput.value) return;
+  const oldTxt=btn.textContent;
+  btn.textContent="...";
+  try{
     const res=await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
-    const d=await res.json(); 
+    const d=await res.json();
     insertAtCursor(`\n${sep}\n📖 ${refText()} (${version.value.toUpperCase()})\n\n${d.text||""}\n${sep}\n`);
-  } catch(e){ alert("Error"); } finally { btn.textContent=oldTxt; }
+  }catch(e){
+    alert("Error fetching verse");
+  }finally{
+    btn.textContent=oldTxt;
+  }
 }
-
 async function previewVerse(){
-  if(!bookInput.value)return; popup.style.display="block"; popupRef.textContent=refText(); popupVerse.value="Loading...";
-  const res=await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
-  const d=await res.json(); popupVerse.value=d.text||"Not found";
+  if(!bookInput.value) return;
+  popup.style.display="block";
+  popupRef.textContent=refText();
+  popupVerse.value="Loading...";
+  try{
+    const res=await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
+    const d=await res.json();
+    popupVerse.value=d.text||"Not found";
+  }catch(e){
+    popupVerse.value="Error fetching verse.";
+  }
 }
-
-function insertTemplate() {
-    const template = `[SERMON OUTLINE]\nOccasion: \nSpeaker: \nTheme: \n\nPoint 1: \nPoint 2: \nPoint 3: \n\nSummary: \n\n--------------------------\n`;
-    insertAtCursor(template);
-    notes.selectionStart = notes.selectionEnd = notes.value.indexOf("Occasion: ") + 10;
-}
-
-function insertTag(tag) { insertAtCursor(tag); }
-function insertTime() { insertAtCursor(`[${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] `); }
-
-function makeBold() {
-    const s = notes.selectionStart; const e = notes.selectionEnd;
-    const txt = notes.value.substring(s, e);
-    if(txt) {
-        const bld = `**${txt}**`;
-        notes.value = notes.value.substring(0, s) + bld + notes.value.substring(e);
-        notes.selectionStart = notes.selectionEnd = s + bld.length;
-    } else { insertAtCursor("**BOLD**"); }
-}
-
 function closePopup(){popup.style.display="none";}
-function copyNotes(){ 
-    notes.select(); 
-    if(document.execCommand("copy")) alert("Copied!"); 
-}
 
+/* NOTES helpers */
+function insertTemplate(){
+  const template = `[SERMON OUTLINE]\nOccasion: \nSpeaker: \nTheme: \n\nPoint 1: \nPoint 2: \nPoint 3: \n\nSummary: \n\n--------------------------\n`;
+  insertAtCursor(template);
+  const idx=notes.value.indexOf("Occasion: ");
+  if(idx>=0){
+    notes.selectionStart=notes.selectionEnd=idx+"Occasion: ".length;
+  }
+}
+function insertTag(tag){insertAtCursor(tag);}
+function insertTime(){
+  insertAtCursor(`[${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] `);
+}
+function makeBold(){
+  const s=notes.selectionStart;
+  const e=notes.selectionEnd;
+  const txt=notes.value.substring(s,e);
+  if(txt){
+    const bld=`**${txt}**`;
+    notes.value=notes.value.substring(0,s)+bld+notes.value.substring(e);
+    notes.selectionStart=notes.selectionEnd=s+bld.length;
+  }else{
+    insertAtCursor("**BOLD**");
+  }
+}
+function copyNotes(){
+  notes.select();
+  if(document.execCommand("copy")) alert("Copied!");
+}
 function sendEmail(){
-  const val = notes.value;
-  let speaker = "", occasion = "";
-  val.split('\n').forEach(line => {
-    if(line.includes("Speaker:")) speaker = line.replace("Speaker:", "").trim();
-    if(line.includes("Occasion:")) occasion = line.replace("Occasion:", "").trim();
+  const val=notes.value;
+  let speaker="", occasion="";
+  val.split('\n').forEach(line=>{
+    if(line.includes("Speaker:")) speaker=line.replace("Speaker:","").trim();
+    if(line.includes("Occasion:")) occasion=line.replace("Occasion:","").trim();
   });
-  let subj = [];
+  let subj=[];
   if(occasion) subj.push(occasion);
   if(speaker) subj.push(speaker);
-  subj.push(subject.value || "Notes");
+  subj.push(subject.value||"Notes");
   location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(subj.join(" - "))}&body=${encodeURIComponent("Date: "+date.value+"\n\n"+val)}`;
 }
+function resetAll(){
+  if(confirm("Clear?")){
+    localStorage.removeItem(STORE_KEY);
+    location.reload();
+  }
+}
 
-function resetAll(){ if(confirm("Clear?")){ localStorage.removeItem(STORE_KEY); location.reload(); } }
+/* Track last typing position in notes */
+let lastNotePos = null;
+let lastNoteScroll = null;
+function rememberNoteState(){
+  if(typeof notes!=='undefined' && notes){
+    lastNotePos = notes.selectionStart;
+    lastNoteScroll = notes.scrollTop;
+  }
+}
 
-document.addEventListener('input', e => { if(e.target.id === 'notes') updateNoteStats(); });
+/* Haptic-style feedback on mobile */
+function hapticPulse(){
+  if(navigator && typeof navigator.vibrate === 'function'){
+    navigator.vibrate(30);
+  }
+}
 
-/* Scroll to Bible Tools and focus Book field */
+/* Scroll helpers */
 function goToBibleTools(){
-  const tools = document.getElementById('bibleTools');
+  rememberNoteState();         // store where we were typing
+  const tools=document.getElementById('bibleTools');
   if(!tools) return;
-  tools.scrollIntoView({behavior:'smooth', block:'start'});
-  setTimeout(() => {
-    if (typeof bookInput !== 'undefined' && bookInput) {
+  const y = tools.getBoundingClientRect().top + window.scrollY - 10;
+  window.scrollTo({top:y,behavior:'smooth'});
+  setTimeout(()=>{
+    if(typeof bookInput!=='undefined' && bookInput){
       bookInput.focus();
       bookInput.select();
     }
-  }, 400);
+  },400);
+  hapticPulse();
 }
+function goBackToNotes(){
+  const notesBox=document.getElementById('notes');
+  if(!notesBox) return;
+  const y = notesBox.getBoundingClientRect().top + window.scrollY - 20;
+  window.scrollTo({top:y,behavior:'smooth'});
+  setTimeout(()=>{
+    notesBox.focus();
+    if(lastNotePos!=null){
+      notesBox.setSelectionRange(lastNotePos,lastNotePos);
+    }
+    if(lastNoteScroll!=null){
+      notesBox.scrollTop=lastNoteScroll;
+    }
+  },400);
+  hapticPulse();
+}
+
+/* Events */
+document.addEventListener('input', e=>{
+  if(e.target.id==='notes') updateNoteStats();
+});
+
+/* Remember note caret/scroll on interactions */
+notes.addEventListener('keyup',rememberNoteState);
+notes.addEventListener('click',rememberNoteState);
+notes.addEventListener('input',rememberNoteState);
+
+/* Auto-close book dropdown on scroll */
+window.addEventListener('scroll',()=>{
+  if(bookList) bookList.style.display="none";
+});
 </script>
 </body>
 </html>
