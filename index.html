@@ -29,6 +29,40 @@
   #popup { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:100; backdrop-filter:blur(2px); }
   .popup-content { background:#fff; max-width:500px; margin:10% auto; padding:20px; border-radius:12px; position:relative; }
   .note-stats { font-size:0.75rem; color:#777; text-align:right; margin-top:-8px; margin-bottom:8px; }
+
+  /* Floating round Bible button */
+  .jump-link{
+    position:fixed;
+    right:16px;
+    bottom:16px;
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    font-size:20px;
+    font-weight:bold;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 3px 8px rgba(0,0,0,.35);
+    cursor:pointer;
+    z-index:50;
+    opacity:.92;
+  }
+  .jump-link:hover{ opacity:1; }
+  .jump-link:active{ transform:scale(.96); }
+
+  @media(max-width:480px){
+    .jump-link{
+      width:42px;
+      height:42px;
+      font-size:18px;
+      right:12px;
+      bottom:12px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -41,7 +75,8 @@
     </div>
   </div>
 
-  <div class="card" style="position:relative;">
+  <!-- Bible Tools card with ID so the button can scroll here -->
+  <div class="card" id="bibleTools" style="position:relative;">
     <h2>Bible Tools</h2>
     <div class="row">
         <div style="flex: 2;"><label>Book</label>
@@ -85,6 +120,9 @@
     </div>
     <button type="button" style="background:transparent; color:#a30000; border:1px solid #a30000; margin-top:10px;" onclick="resetAll()">Reset Page</button>
   </div>
+
+  <!-- Floating round button to jump to Bible Tools -->
+  <button type="button" class="jump-link" onclick="goToBibleTools()">📖</button>
 </div>
 
 <div id="popup" onclick="closePopup()">
@@ -237,6 +275,19 @@ function sendEmail(){
 function resetAll(){ if(confirm("Clear?")){ localStorage.removeItem(STORE_KEY); location.reload(); } }
 
 document.addEventListener('input', e => { if(e.target.id === 'notes') updateNoteStats(); });
+
+/* Scroll to Bible Tools and focus Book field */
+function goToBibleTools(){
+  const tools = document.getElementById('bibleTools');
+  if(!tools) return;
+  tools.scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(() => {
+    if (typeof bookInput !== 'undefined' && bookInput) {
+      bookInput.focus();
+      bookInput.select();
+    }
+  }, 400);
+}
 </script>
 </body>
 </html>
