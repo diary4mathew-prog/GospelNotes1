@@ -197,7 +197,7 @@
     margin-bottom:8px;
   }
 
-  /* Floating round Bible button (top of the pair) */
+  /* Floating round buttons – vertically centered on right */
   .jump-link,
   .jump-notes{
     position:fixed;
@@ -218,8 +218,14 @@
     opacity:.85;
     transition:opacity .2s,transform .1s,box-shadow .2s;
   }
-  .jump-link{bottom:100px;}   /* Bible button slightly higher */
-  .jump-notes{bottom:40px;}   /* Notes button nearer bottom */
+  .jump-link{
+    top:50%;
+    transform:translateY(-70%);
+  }
+  .jump-notes{
+    top:50%;
+    transform:translateY(-10%);
+  }
   .jump-link:hover,
   .jump-notes:hover{
     opacity:1;
@@ -227,7 +233,10 @@
   }
   .jump-link:active,
   .jump-notes:active{
-    transform:scale(.95);
+    transform:scale(.95) translateY(-70%);
+  }
+  .jump-notes:active{
+    transform:scale(.95) translateY(-10%);
   }
   @media(max-width:480px){
     .jump-link,.jump-notes{
@@ -236,11 +245,11 @@
       font-size:18px;
       right:12px;
     }
-    .jump-link{bottom:90px;}
-    .jump-notes{bottom:30px;}
+    .jump-link{transform:translateY(-80%);}
+    .jump-notes{transform:translateY(0%);}
   }
 
-  /* Theme toggle button */
+  /* Theme toggle */
   .theme-toggle{
     position:fixed;
     top:10px;
@@ -272,7 +281,7 @@
     </div>
   </div>
 
-  <!-- Bible Tools card -->
+  <!-- Bible Tools -->
   <div class="card" id="bibleTools" style="position:relative;">
     <h2>Bible Tools</h2>
     <div class="row">
@@ -337,10 +346,9 @@
     <button type="button" style="background:transparent; color:#a30000; border:1px solid #a30000; margin-top:10px;" onclick="resetAll()">Reset Page</button>
   </div>
 
-  <!-- Floating round buttons -->
+  <!-- Floating middle buttons -->
   <button type="button" class="jump-link" onclick="goToBibleTools()">📖</button>
   <button type="button" class="jump-notes" onclick="goBackToNotes()">✍️</button>
-
 </div>
 
 <!-- Theme toggle -->
@@ -357,7 +365,7 @@
 <script>
 const STORE_KEY = "church_archivist_final_v14";
 const THEME_KEY = "sermon_theme";
-const bibleData = {/* SAME bibleData AS YOUR PREVIOUS VERSION, KEEP IT HERE */ 
+const bibleData = {
 "Genesis":[50,31,25,24,26,32,22,24,22,29,32,32,20,18,24,21,16,27,33,38,18,34,24,20,67,34,35,46,35,43,55,54,33,20,31,29,43,36,30,23,23,57,38,34,34,28,34,31,22,33,26],
 "Exodus":[40,22,25,22,31,30,30,25,32,35,32,29,51,22,22,27,21,16,27,25,26,36,31,33,18,40,37,21,43,46,38,18,35,23,35,35,38,29,31,43,38],
 "Leviticus":[27,17,16,17,35,19,30,38,36,24,20,47,8,59,57,33,34,16,30,37,27,24,33,44,23,55,46,34],
@@ -425,13 +433,12 @@ const bibleData = {/* SAME bibleData AS YOUR PREVIOUS VERSION, KEEP IT HERE */
 "Jude":[1,25],
 "Revelation":[22,20,29,22,11,14,17,17,13,21,11,19,17,18,20,8,21,24,18,21,15,21,21]
 };
-
 const books = Object.keys(bibleData);
 const sep="----------------------------";
 
 date.valueAsDate=new Date();
 
-/* THEME */
+/* Theme */
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme',theme);
   const tBtn=document.getElementById('themeToggle');
@@ -452,7 +459,7 @@ function toggleTheme(){
   localStorage.setItem(THEME_KEY,next);
 }
 
-/* RESTORE */
+/* Restore */
 (function restore(){
   const d=JSON.parse(localStorage.getItem(STORE_KEY)||"{}");
   if(d.date) date.value=d.date;
@@ -472,10 +479,10 @@ function updateNoteStats(){
   const text = notes.value || "";
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   const lines = text ? text.split('\n').length : 0;
-  document.getElementById('noteStats').textContent = `${words} words · ${lines} lines`;
+  noteStats.textContent = `${words} words · ${lines} lines`;
 }
 
-/* BIBLE TOOLS */
+/* Bible tools */
 function filterBooks(){
   bookList.innerHTML="";
   const q=bookInput.value.toLowerCase();
@@ -568,7 +575,7 @@ async function previewVerse(){
 }
 function closePopup(){popup.style.display="none";}
 
-/* NOTES helpers */
+/* Notes helpers */
 function insertTemplate(){
   const template = `[SERMON OUTLINE]\nOccasion: \nSpeaker: \nTheme: \n\nPoint 1: \nPoint 2: \nPoint 3: \n\nSummary: \n\n--------------------------\n`;
   insertAtCursor(template);
@@ -617,7 +624,7 @@ function resetAll(){
   }
 }
 
-/* Track last typing position in notes */
+/* Track last typing position */
 let lastNotePos = null;
 let lastNoteScroll = null;
 function rememberNoteState(){
@@ -627,32 +634,34 @@ function rememberNoteState(){
   }
 }
 
-/* Haptic-style feedback on mobile */
+/* Haptic feedback */
 function hapticPulse(){
   if(navigator && typeof navigator.vibrate === 'function'){
     navigator.vibrate(30);
   }
 }
 
-/* Scroll helpers */
+/* Scroll: Bible Tools should be at top (no Date visible) */
 function goToBibleTools(){
-  rememberNoteState();         // store where we were typing
+  rememberNoteState();  // remember where we were typing
   const tools=document.getElementById('bibleTools');
   if(!tools) return;
-  const y = tools.getBoundingClientRect().top + window.scrollY - 10;
+  const y = tools.offsetTop - 10;   // align Bible card to top area
   window.scrollTo({top:y,behavior:'smooth'});
   setTimeout(()=>{
-    if(typeof bookInput!=='undefined' && bookInput){
+    if(bookInput){
       bookInput.focus();
       bookInput.select();
     }
   },400);
   hapticPulse();
 }
+
+/* Scroll back to Notes, to where you were typing */
 function goBackToNotes(){
   const notesBox=document.getElementById('notes');
   if(!notesBox) return;
-  const y = notesBox.getBoundingClientRect().top + window.scrollY - 20;
+  const y = notesBox.offsetTop - 10;
   window.scrollTo({top:y,behavior:'smooth'});
   setTimeout(()=>{
     notesBox.focus();
@@ -670,13 +679,11 @@ function goBackToNotes(){
 document.addEventListener('input', e=>{
   if(e.target.id==='notes') updateNoteStats();
 });
-
-/* Remember note caret/scroll on interactions */
 notes.addEventListener('keyup',rememberNoteState);
 notes.addEventListener('click',rememberNoteState);
 notes.addEventListener('input',rememberNoteState);
 
-/* Auto-close book dropdown on scroll */
+/* Auto-close dropdown on scroll */
 window.addEventListener('scroll',()=>{
   if(bookList) bookList.style.display="none";
 });
