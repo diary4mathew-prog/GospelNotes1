@@ -1,370 +1,841 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sermon Notes Library</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>The Archivist · Sermon Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --primary:#6b4f3f;
-    --primary-light:#8a6d5a;
-    --bg:#f2ede4;
-    --card:#ffffff;
-    --border:#d1c7bc;
-    --success:#2e7d32;
-    --error:#d32f2f;
-    --text:#222222;
-    --muted:#777777;
-    --tag-bg:#eeeeee;
-  }
-  [data-theme="dark"]{
-    --primary:#d1b08a;
-    --primary-light:#f5d2a4;
-    --bg:#0b0f19;
-    --card:#161b26;
-    --border:#333c4f;
-    --success:#6fbf73;
-    --error:#ef5350;
-    --text:#e7eaf3;
-    --muted:#a6b1d6;
-    --tag-bg:#1f2633;
-  }
+/* ============================================================
+   DESIGN: Sacred illuminated manuscript — warm parchment,
+   ink-black text, gold leaf accents, gothic calligraphy.
+   ============================================================ */
 
-  body{
-    margin:0;
-    padding:15px;
-    font-family:'Segoe UI',sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    display:flex;
-    justify-content:center;
-  }
-  .container{max-width:600px;width:100%;}
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:18px;
-    margin-bottom:18px;
-    box-shadow:0 2px 5px rgba(0,0,0,0.05);
-  }
-  h2{
-    margin:0 0 10px 0;
-    font-size:1rem;
-    color:var(--primary);
-    text-transform:uppercase;
-    letter-spacing:1px;
-  }
-  label{
-    font-size:.75rem;
-    font-weight:600;
-    color:var(--muted);
-    display:block;
-    margin-bottom:4px;
-  }
-  .cap-text{
-    font-size:0.7rem;
-    color:var(--primary-light);
-    font-weight:bold;
-    margin-top:4px;
-    display:block;
-  }
-  input,textarea,select,button{
-    width:100%;
-    box-sizing:border-box;
-    padding:12px;
-    margin-top:4px;
-    margin-bottom:12px;
-    font-size:16px;
-    border-radius:8px;
-    border:1px solid var(--border);
-    outline:none;
-    background:#ffffff;
-  }
-  [data-theme="dark"] input,
-  [data-theme="dark"] textarea,
-  [data-theme="dark"] select,
-  [data-theme="dark"] button{
-    background:#202633;
-    color:var(--text);
-    border-color:var(--border);
-  }
-  textarea{
-    min-height:350px;
-    resize:vertical;
-    line-height:1.5;
-    font-family:inherit;
-  }
-  .row{display:flex;gap:10px;}
-  button{
-    background:var(--primary);
-    color:#fff;
-    border:none;
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.2s;
-  }
-  button:active{transform:scale(0.98);opacity:0.9;}
-  .tag-bar{
-    display:flex;
-    flex-wrap:wrap;
-    gap:5px;
-    margin-bottom:10px;
-    background:var(--tag-bg);
-    padding:10px;
-    border-radius:8px;
-  }
-  .tag-bar button{
-    width:auto;
-    padding:8px 12px;
-    font-size:13px;
-    margin:0;
-    background:#fff;
-    color:#333;
-    border:1px solid #ccc;
-    flex-grow:1;
-  }
-  [data-theme="dark"] .tag-bar button{
-    background:#202633;
-    color:var(--text);
-    border-color:var(--border);
-  }
-  .tag-bar button:active{
-    background:var(--primary-light);
-    color:#fff;
-  }
-  .book-list{
-    position:absolute;
-    background:#fff;
-    border:1px solid var(--border);
-    max-height:180px;
-    overflow-y:auto;
-    width:100%;
-    z-index:10;
-    display:none;
-    border-radius:8px;
-  }
-  [data-theme="dark"] .book-list{
-    background:#202633;
-    border-color:var(--border);
-  }
-  .book-item{
-    padding:10px;
-    cursor:pointer;
-    border-bottom:1px solid #eee;
-  }
-  [data-theme="dark"] .book-item{
-    border-bottom:1px solid #2a3243;
-  }
-  .book-item:hover{
-    background:#f6f3ef;
-    font-weight:bold;
-  }
-  [data-theme="dark"] .book-item:hover{
-    background:#252d3d;
-  }
-  .clear-x{
-    position:absolute;
-    right:12px;
-    top:38px;
-    cursor:pointer;
-    color:#999;
-    font-weight:bold;
-    z-index:5;
-    padding:5px;
-  }
-  #popup{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.7);
-    z-index:100;
-    backdrop-filter:blur(2px);
-  }
-  .popup-content{
-    background:#fff;
-    max-width:500px;
-    margin:10% auto;
-    padding:20px;
-    border-radius:12px;
-    position:relative;
-  }
-  .note-stats{
-    font-size:0.75rem;
-    color:var(--muted);
-    text-align:right;
-    margin-top:-8px;
-    margin-bottom:8px;
-  }
+:root {
+  --bg:       #f5efe3;
+  --bg2:      #ede4d4;
+  --panel:    #faf5ec;
+  --ink:      #1c1208;
+  --ink2:     #3a2e1c;
+  --muted:    #7a6a50;
+  --border:   #c8b898;
+  --border2:  #a8966e;
+  --gold:     #8b6914;
+  --gold2:    #c9971f;
+  --gold-light: #e8c86a;
+  --gold-glow: rgba(139,105,20,0.12);
+  --crimson:  #7a1f2e;
+  --teal:     #1e5c5a;
+  --shadow:   rgba(28,18,8,0.15);
+  --shadow2:  rgba(28,18,8,0.25);
+  --parchment-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  --radius:   14px;
+  --radius-sm: 8px;
+}
 
-  /* Floating round buttons – vertically centered on right */
-  .jump-link,
-  .jump-notes{
-    position:fixed;
-    right:16px;
-    width:48px;
-    height:48px;
-    border-radius:50%;
-    background:var(--primary);
-    color:#fff;
-    border:none;
-    font-size:20px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    box-shadow:0 3px 8px rgba(0,0,0,.35);
-    cursor:pointer;
-    z-index:50;
-    opacity:.85;
-    transition:opacity .2s,transform .1s,box-shadow .2s;
-  }
-  .jump-link{
-    top:50%;
-    transform:translateY(-70%);
-  }
-  .jump-notes{
-    top:50%;
-    transform:translateY(-10%);
-  }
-  .jump-link:hover,
-  .jump-notes:hover{
-    opacity:1;
-    box-shadow:0 4px 10px rgba(0,0,0,.45);
-  }
-  .jump-link:active,
-  .jump-notes:active{
-    transform:scale(.95) translateY(-70%);
-  }
-  .jump-notes:active{
-    transform:scale(.95) translateY(-10%);
-  }
-  @media(max-width:480px){
-    .jump-link,.jump-notes{
-      width:42px;
-      height:42px;
-      font-size:18px;
-      right:12px;
-    }
-    .jump-link{transform:translateY(-80%);}
-    .jump-notes{transform:translateY(0%);}
-  }
+body.dark {
+  --bg:       #0d0c09;
+  --bg2:      #131108;
+  --panel:    #18160e;
+  --ink:      #ede4cd;
+  --ink2:     #c8b898;
+  --muted:    #7a6a50;
+  --border:   #2e2a1e;
+  --border2:  #4a4228;
+  --gold:     #c9971f;
+  --gold2:    #e8c86a;
+  --gold-light: #f5e0a0;
+  --gold-glow: rgba(201,151,31,0.1);
+  --crimson:  #c94a5a;
+  --teal:     #4ab8b4;
+  --shadow:   rgba(0,0,0,0.4);
+  --shadow2:  rgba(0,0,0,0.6);
+}
 
-  /* Theme toggle */
-  .theme-toggle{
-    position:fixed;
-    top:10px;
-    right:16px;
-    width:32px;
-    height:32px;
-    border-radius:50%;
-    background:var(--card);
-    color:var(--primary);
-    border:1px solid var(--border);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:16px;
-    box-shadow:0 2px 6px rgba(0,0,0,.25);
-    cursor:pointer;
-    z-index:60;
-    padding:0;
-  }
+*, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: 'Crimson Pro', 'EB Garamond', Georgia, serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Ambient parchment texture */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: var(--parchment-grain);
+  pointer-events: none; z-index: 0; opacity: 0.5;
+}
+
+/* Decorative top border */
+body::after {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold2), var(--gold), transparent);
+  z-index: 100;
+}
+
+/* ---- HEADER ---- */
+.app-header {
+  position: sticky; top: 0; z-index: 80;
+  background: rgba(245,239,227,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  display: flex; align-items: center; gap: 12px;
+  height: 58px;
+}
+body.dark .app-header { background: rgba(13,12,9,0.92); }
+
+.header-brand {
+  flex: 1;
+  text-align: center;
+}
+.header-brand .title {
+  font-family: 'Cinzel', serif;
+  font-size: 18px; font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 3px; text-transform: uppercase;
+  line-height: 1;
+}
+.header-brand .subtitle {
+  font-family: 'IM Fell English', serif;
+  font-size: 11px; font-style: italic;
+  color: var(--muted); letter-spacing: 1px;
+}
+
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: all 0.2s; flex-shrink: 0;
+}
+.icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+.icon-btn:active { transform: scale(0.93); }
+
+/* ---- TABS ---- */
+.tabs {
+  display: flex; position: sticky; top: 58px; z-index: 70;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex: 1; min-width: 80px; padding: 12px 8px;
+  background: transparent; border: none;
+  font-family: 'Cinzel', serif; font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s; white-space: nowrap;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ---- VIEWS ---- */
+.view { display: none; }
+.view.active { display: block; animation: revealView 0.35s ease; }
+@keyframes revealView {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- MAIN WRAPPER ---- */
+.page-wrap { max-width: 640px; margin: 0 auto; padding: 20px 14px 120px; position: relative; z-index: 1; }
+
+/* ---- SECTION CARD ---- */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 12px var(--shadow), 0 0 0 1px rgba(255,255,255,0.4) inset;
+  position: relative; overflow: hidden;
+  transition: box-shadow 0.25s;
+}
+body.dark .card { box-shadow: 0 2px 12px var(--shadow); }
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+  opacity: 0.4;
+}
+
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin: 0 0 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::before, .section-title::after {
+  content: '✦'; font-size: 8px; opacity: 0.6;
+}
+
+/* ---- FORM ---- */
+label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 6px;
+}
+
+input[type="text"], input[type="date"], input[type="number"], select, textarea {
+  width: 100%; padding: 11px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink); font-family: 'EB Garamond', serif; font-size: 17px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 14px;
+  -webkit-appearance: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow);
+}
+input::placeholder, textarea::placeholder { color: var(--muted); font-style: italic; }
+
+.form-row { display: flex; gap: 12px; }
+.form-row > * { flex: 1; }
+
+/* ---- BUTTONS ---- */
+.btn {
+  padding: 11px 18px; border-radius: var(--radius-sm); border: none;
+  font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn:active { transform: scale(0.97); }
+.btn.primary {
+  background: linear-gradient(135deg, var(--gold), #6b4e10);
+  color: #fff9ee;
+  box-shadow: 0 2px 10px rgba(139,105,20,0.3);
+}
+.btn.primary:hover { box-shadow: 0 4px 18px rgba(139,105,20,0.45); }
+.btn.secondary {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--ink2);
+}
+.btn.secondary:hover { border-color: var(--gold); color: var(--gold); }
+.btn.ghost { background: transparent; border: none; color: var(--muted); padding: 8px; }
+.btn.ghost:hover { color: var(--gold); }
+.btn.crimson { background: var(--crimson); color: #fff; border: none; }
+.btn.sm { padding: 7px 12px; font-size: 9px; }
+.btn.full { width: 100%; margin-bottom: 8px; }
+
+/* ---- TAG BAR ---- */
+.tag-bar {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  background: var(--bg2); padding: 12px;
+  border-radius: var(--radius-sm); margin-bottom: 14px;
+  border: 1px solid var(--border);
+}
+.tag-chip {
+  padding: 7px 12px; border-radius: 50px;
+  background: var(--panel); border: 1px solid var(--border);
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--ink2);
+  cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+.tag-chip:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+.tag-chip:active { transform: scale(0.96); }
+
+/* ---- NOTES TEXTAREA ---- */
+#notes {
+  min-height: 380px; resize: vertical;
+  line-height: 1.75; font-size: 17px;
+  letter-spacing: 0.2px;
+  background: linear-gradient(transparent, transparent 27px, var(--border) 28px);
+  background-size: 100% 28px;
+  padding-top: 4px;
+}
+
+.note-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'Cinzel', serif; font-size: 9px;
+  color: var(--muted); letter-spacing: 1px;
+  margin-top: -10px; margin-bottom: 14px;
+}
+.note-meta .saving { color: var(--gold); font-style: italic; opacity: 0; transition: opacity 0.3s; }
+.note-meta .saving.show { opacity: 1; }
+
+/* ---- VERSE PREVIEW ---- */
+.verse-preview-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius-sm); padding: 14px;
+  margin-top: 8px; margin-bottom: 14px;
+  display: none; animation: revealView 0.25s ease;
+  font-size: 17px; line-height: 1.7; font-style: italic;
+  color: var(--ink2); position: relative;
+}
+.verse-preview-box .vp-ref {
+  font-family: 'Cinzel', serif; font-size: 10px;
+  letter-spacing: 2px; color: var(--gold); font-style: normal;
+  margin-bottom: 8px;
+}
+.verse-preview-box .vp-actions {
+  display: flex; gap: 8px; margin-top: 12px;
+}
+
+/* ---- BOOK DROPDOWN ---- */
+.book-wrap { position: relative; }
+.book-list {
+  position: absolute; top: calc(100% - 10px); left: 0; right: 0;
+  background: var(--panel); border: 1px solid var(--border2);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  max-height: 200px; overflow-y: auto;
+  z-index: 30; display: none;
+  box-shadow: 0 8px 24px var(--shadow2);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.book-item {
+  padding: 11px 14px; cursor: pointer;
+  font-family: 'EB Garamond', serif; font-size: 16px;
+  border-bottom: 1px solid var(--border); transition: background 0.15s;
+}
+.book-item:last-child { border-bottom: none; }
+.book-item:hover { background: var(--gold-glow); color: var(--gold); }
+.book-item.highlight { background: var(--gold-glow); font-weight: 600; }
+.clear-x {
+  position: absolute; right: 10px; top: 14px;
+  color: var(--muted); cursor: pointer; font-size: 14px;
+  z-index: 5; padding: 4px; transition: color 0.2s;
+}
+.clear-x:hover { color: var(--crimson); }
+
+/* Cap labels */
+.cap-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; letter-spacing: 1.5px;
+  color: var(--gold); margin-top: -10px; margin-bottom: 10px; display: block;
+}
+
+/* ---- VERSE RESULT IN NOTES ---- */
+.verse-inserting-btn { position: relative; }
+.verse-inserting-btn .loading-ring {
+  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  display: none; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.verse-inserting-btn.loading .btn-label { display: none; }
+.verse-inserting-btn.loading .loading-ring { display: block; }
+
+/* ---- SAVED NOTES VIEW ---- */
+.saved-note {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+  cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.saved-note::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(var(--gold), var(--gold2)); opacity: 0;
+  transition: opacity 0.2s;
+}
+.saved-note:hover { border-color: var(--gold); transform: translateX(3px); }
+.saved-note:hover::before { opacity: 1; }
+.saved-note-title {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 20px; color: var(--ink); margin-bottom: 4px;
+}
+.saved-note-meta {
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1.5px;
+  color: var(--muted); text-transform: uppercase;
+}
+.saved-note-preview {
+  font-size: 15px; color: var(--ink2); line-height: 1.5;
+  margin-top: 8px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.saved-note-actions {
+  display: flex; gap: 6px; margin-top: 12px;
+}
+
+/* ---- STATS VIEW ---- */
+.stat-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 18px; }
+.stat-tile {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px; text-align: center;
+}
+.stat-tile .s-num {
+  font-family: 'Cinzel', serif; font-size: 28px; font-weight: 700;
+  color: var(--gold); display: block; line-height: 1;
+}
+.stat-tile .s-label {
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted); margin-top: 6px;
+}
+
+/* ---- REFERENCE CHIPS ---- */
+.ref-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.ref-chip {
+  background: var(--gold-glow); border: 1px solid rgba(139,105,20,0.3);
+  border-radius: 50px; padding: 5px 12px;
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1px;
+  color: var(--gold); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.ref-chip:hover { background: rgba(139,105,20,0.2); }
+.ref-chip .chip-x { opacity: 0.5; }
+
+/* ---- VERSE HISTORY ---- */
+.verse-hist { margin-top: 14px; }
+.verse-hist-label {
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+}
+.verse-hist-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: background 0.15s;
+  font-size: 15px;
+}
+.verse-hist-item:hover { background: var(--gold-glow); }
+.verse-hist-item .vhi-ref { color: var(--gold); flex: 1; font-family: 'IM Fell English', serif; }
+.verse-hist-item .vhi-del { color: var(--muted); font-size: 12px; }
+
+/* ---- FLOATING BUTTONS ---- */
+.fab-group {
+  position: fixed;
+  right: 14px; bottom: calc(24px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 10px; z-index: 90;
+}
+.fab {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; border: none; cursor: pointer;
+  box-shadow: 0 4px 16px var(--shadow2);
+  transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.fab:active { transform: scale(0.9); }
+.fab.gold { background: linear-gradient(135deg, var(--gold2), var(--gold)); color: #fff9ee; }
+.fab.dark-btn { background: var(--panel); border: 1px solid var(--border); color: var(--ink2); }
+.fab:hover { transform: scale(1.08); }
+.fab-tooltip {
+  position: absolute; right: 62px;
+  background: var(--ink); color: var(--bg);
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1px;
+  padding: 5px 10px; border-radius: 6px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s;
+}
+.fab:hover .fab-tooltip { opacity: 1; }
+
+/* ---- TOAST ---- */
+#toaster {
+  position: fixed; bottom: calc(90px + env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  z-index: 500; display: flex; flex-direction: column; gap: 8px;
+  width: 90%; max-width: 360px; pointer-events: none;
+}
+.toast {
+  background: var(--ink); color: var(--bg);
+  border-radius: 50px; padding: 11px 20px;
+  font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1.5px;
+  text-align: center; text-transform: uppercase;
+  box-shadow: 0 6px 20px var(--shadow2);
+  animation: toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.success { background: var(--teal); }
+.toast.error   { background: var(--crimson); }
+.toast.gold    { background: var(--gold); color: #fff9ee; }
+@keyframes toastIn {
+  from { opacity: 0; transform: scale(0.8) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes toastOut {
+  to   { opacity: 0; transform: scale(0.8); }
+}
+
+/* ---- MODAL ---- */
+.modal-back {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+  z-index: 200; display: none;
+  align-items: center; justify-content: center; padding: 16px;
+}
+.modal-box {
+  background: var(--panel); border: 1px solid var(--border2);
+  border-radius: 18px; width: 95%; max-width: 480px;
+  max-height: 88dvh; overflow: hidden;
+  box-shadow: 0 24px 60px var(--shadow2);
+  display: flex; flex-direction: column;
+  animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.88) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(180deg, var(--gold-glow) 0%, transparent 100%);
+}
+.modal-head h3 {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 22px; color: var(--ink); margin: 0;
+}
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+.modal-foot { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+
+/* ---- EMPTY STATE ---- */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+}
+.empty-state .es-symbol {
+  font-size: 48px; margin-bottom: 16px; opacity: 0.3;
+  font-family: 'Cinzel', serif;
+}
+.empty-state .es-title {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 24px; color: var(--ink2); margin-bottom: 6px;
+}
+.empty-state .es-sub {
+  font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px;
+  color: var(--muted); text-transform: uppercase;
+}
+
+/* ---- ORNAMENTAL DIVIDER ---- */
+.ornament {
+  text-align: center; color: var(--gold);
+  font-size: 14px; letter-spacing: 6px;
+  margin: 8px 0 16px; opacity: 0.6;
+}
+
+/* ---- SEARCH ---- */
+.search-wrap {
+  position: relative; margin-bottom: 16px;
+}
+.search-wrap input { padding-left: 38px; margin-bottom: 0; }
+.search-icon {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); font-size: 14px; pointer-events: none;
+}
+
+/* ---- PRINT / SHARE ---- */
+@media print {
+  .app-header, .tabs, .fab-group, #toaster, .tag-bar,
+  .btn, .card .section-title::before, .card .section-title::after { display: none !important; }
+  body { background: white; }
+  .card { box-shadow: none; border: none; }
+  #notes { min-height: unset; background: none; }
+}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 480px) {
+  .form-row { flex-direction: column; gap: 0; }
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+.hidden { display: none !important; }
+.flex { display: flex; }
+.gap8 { gap: 8px; }
+.grow { flex: 1; }
+.mt8 { margin-top: 8px; }
+
+/* ornamental crosshatch bg for header area */
+.header-ornament {
+  font-family: 'Cinzel', serif;
+  font-size: 11px; letter-spacing: 4px;
+  color: var(--gold); opacity: 0.4;
+}
+
+/* Word count progress bar */
+.wc-bar-wrap {
+  height: 3px; background: var(--border); border-radius: 2px;
+  margin-bottom: 12px; overflow: hidden;
+}
+.wc-bar {
+  height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2));
+  border-radius: 2px; transition: width 0.3s; width: 0%;
+}
+
+/* Highlighted verse text */
+.verse-text-rendered {
+  font-family: 'EB Garamond', serif;
+  font-size: 18px; font-style: italic; line-height: 1.8;
+  color: var(--ink2);
+}
+.verse-text-rendered .verse-num {
+  font-style: normal; font-size: 11px; vertical-align: super;
+  color: var(--gold); font-family: 'Cinzel', serif;
+  margin-right: 3px; font-weight: 600;
+}
+
+/* Speaker & Occasion chips */
+.meta-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.meta-chip {
+  background: var(--gold-glow); border: 1px solid rgba(139,105,20,0.25);
+  border-radius: 6px; padding: 8px 12px;
+  font-family: 'EB Garamond', serif; font-size: 16px;
+  color: var(--ink2); transition: border-color 0.2s;
+  flex: 1;
+}
+.meta-chip input {
+  background: none; border: none; outline: none;
+  color: inherit; font-family: inherit; font-size: inherit;
+  width: 100%; margin: 0; padding: 0;
+}
+.meta-chip label { font-size: 8px; margin-bottom: 2px; }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="card">
-    <h2>General</h2>
-    <div class="row">
-      <div style="flex:1"><label>Date</label><input type="date" id="date"></div>
-      <div style="flex:2"><label>Sermon Title</label><input type="text" id="subject" placeholder="Title" oninput="save()"></div>
-    </div>
-  </div>
 
-  <!-- Bible Tools -->
-  <div class="card" id="bibleTools" style="position:relative;">
-    <h2>Bible Tools</h2>
-    <div class="row">
-      <div style="flex: 2;">
-        <label>Book</label>
-        <div style="position:relative;">
-          <input id="bookInput" placeholder="Search..." oninput="filterBooks()" onclick="this.select()" autocomplete="off">
-          <span class="clear-x" onclick="clearBook()">✕</span>
-          <div class="book-list" id="bookList"></div>
+<!-- ======================== HEADER ======================== -->
+<header class="app-header">
+  <button class="icon-btn" onclick="window.print()" title="Print">⎙</button>
+  <div class="header-brand">
+    <div class="title">The Archivist</div>
+    <div class="subtitle">Sermon Notes Library</div>
+  </div>
+  <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">☽</button>
+</header>
+
+<!-- ======================== TABS ======================== -->
+<div class="tabs">
+  <button class="tab-btn active" data-view="compose" onclick="switchTab(this,'compose')">✦ Compose</button>
+  <button class="tab-btn" data-view="library" onclick="switchTab(this,'library')">☰ Library</button>
+  <button class="tab-btn" data-view="insights" onclick="switchTab(this,'insights')">◈ Insights</button>
+</div>
+
+<!-- ======================== COMPOSE VIEW ======================== -->
+<div id="compose" class="view active">
+  <div class="page-wrap">
+
+    <!-- General -->
+    <div class="card">
+      <div class="section-title">General</div>
+      <div class="form-row">
+        <div>
+          <label>Date</label>
+          <input type="date" id="date" oninput="save()">
+        </div>
+        <div style="flex:2">
+          <label>Sermon Title</label>
+          <input type="text" id="subject" placeholder="Enter sermon title…" oninput="save()">
         </div>
       </div>
-      <div style="flex: 1;">
-        <label>Version</label>
-        <select id="version">
-          <option value="web" selected>WEB</option>
-          <option value="kjv">KJV</option>
-          <option value="asv">ASV</option>
-        </select>
+      <div class="meta-chips">
+        <div class="meta-chip">
+          <label>Speaker</label>
+          <input type="text" id="speaker" placeholder="Speaker name…" oninput="save()">
+        </div>
+        <div class="meta-chip">
+          <label>Occasion / Series</label>
+          <input type="text" id="occasion" placeholder="Easter, Revival…" oninput="save()">
+        </div>
       </div>
     </div>
-    <div class="row">
-      <div style="flex:1">
-        <label>Ch</label>
-        <input id="chapter" type="number" value="1" oninput="updateVerseLimit();">
-        <span id="chCap" class="cap-text">-- Chs</span>
-      </div>
-      <div style="flex:1">
-        <label>From</label>
-        <input id="verseFrom" type="number" value="1" oninput="syncVerseTo();">
-        <span id="vCap" class="cap-text">-- Max</span>
-      </div>
-      <div style="flex:1">
-        <label>To</label>
-        <input id="verseTo" type="number" value="1">
-        <span style="visibility:hidden" class="cap-text">.</span>
-      </div>
-    </div>
-    <div class="row">
-      <button type="button" style="background:transparent; color:var(--primary); border:2px solid var(--primary);" onclick="addRef()">Ref Only</button>
-      <button type="button" onclick="addRefVerse(this)">Ref + Verse</button>
-      <button type="button" style="background:#555;" onclick="previewVerse()">Preview</button>
-    </div>
-  </div>
 
-  <!-- Notes -->
-  <div class="card">
-    <h2>Notes</h2>
-    <div class="tag-bar">
-      <button type="button" onclick="insertTemplate()">📄 Template</button>
-      <button type="button" onclick="insertTag('[PRAYER] 🙏 ')">🙏 Prayer</button>
-      <button type="button" onclick="insertTag('[INSIGHT] 💡 ')">💡 Insight</button>
-      <button type="button" onclick="insertTag('[ANCHOR] ⚓ ')">⚓ Anchor</button>
-      <button type="button" onclick="makeBold()"><b>B</b> Bold</button>
-      <button type="button" onclick="insertTime()">🕒 Time</button>
-    </div>
-    <textarea id="notes" placeholder="Start typing..."></textarea>
-    <div id="noteStats" class="note-stats">0 words · 0 lines</div>
-    <div class="row">
-      <button type="button" style="background:#0277bd; flex:1;" onclick="copyNotes()">📋 Copy All</button>
-      <button type="button" style="background:var(--success); flex:2;" onclick="sendEmail()">📧 Email to Gmail</button>
-    </div>
-    <button type="button" style="background:transparent; color:#a30000; border:1px solid #a30000; margin-top:10px;" onclick="resetAll()">Reset Page</button>
-  </div>
+    <!-- Bible Tools -->
+    <div class="card" id="bibleCard">
+      <div class="section-title">Bible Tools</div>
 
-  <!-- Floating middle buttons -->
-  <button type="button" class="jump-link" onclick="goToBibleTools()">📖</button>
-  <button type="button" class="jump-notes" onclick="goBackToNotes()">✍️</button>
+      <div class="form-row" style="align-items:flex-start">
+        <div style="flex:2">
+          <label>Book</label>
+          <div class="book-wrap">
+            <input id="bookInput" placeholder="Search book…" oninput="filterBooks()" onclick="this.select()" autocomplete="off">
+            <span class="clear-x" onclick="clearBook()">✕</span>
+            <div class="book-list" id="bookList"></div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <label>Version</label>
+          <select id="version">
+            <option value="web" selected>WEB</option>
+            <option value="kjv">KJV</option>
+            <option value="asv">ASV</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Chapter</label>
+          <input id="chapter" type="number" value="1" min="1" oninput="updateVerseLimit()">
+          <span id="chCap" class="cap-label">— Chs</span>
+        </div>
+        <div>
+          <label>From</label>
+          <input id="verseFrom" type="number" value="1" min="1" oninput="syncVerseTo()">
+          <span id="vCap" class="cap-label">— Max</span>
+        </div>
+        <div>
+          <label>To</label>
+          <input id="verseTo" type="number" value="1" min="1">
+          <span class="cap-label" style="visibility:hidden">.</span>
+        </div>
+      </div>
+
+      <!-- Verse preview area -->
+      <div class="verse-preview-box" id="versePreviewBox">
+        <div class="vp-ref" id="vpRef"></div>
+        <div class="verse-text-rendered" id="vpText">Loading…</div>
+        <div class="vp-actions">
+          <button class="btn primary sm" onclick="insertFromPreview()">↓ Insert into Notes</button>
+          <button class="btn secondary sm" onclick="hidePreview()">Close</button>
+        </div>
+      </div>
+
+      <div class="flex gap8 mt8">
+        <button class="btn secondary grow" onclick="addRef()">Ref Only</button>
+        <div class="verse-inserting-btn grow" id="refVerseBtn">
+          <button class="btn primary grow" onclick="addRefVerse(this)" style="width:100%">
+            <span class="btn-label">Ref + Verse</span>
+            <div class="loading-ring"></div>
+          </button>
+        </div>
+        <button class="btn secondary grow" onclick="previewVerse()">Preview</button>
+      </div>
+
+      <!-- Recent verse history -->
+      <div class="verse-hist" id="verseHist"></div>
+    </div>
+
+    <!-- Notes -->
+    <div class="card">
+      <div class="section-title">Notes</div>
+      <div class="tag-bar">
+        <div class="tag-chip" onclick="insertTemplate()">📄 Template</div>
+        <div class="tag-chip" onclick="insertTag('[PRAYER] 🙏 ')">🙏 Prayer</div>
+        <div class="tag-chip" onclick="insertTag('[INSIGHT] 💡 ')">💡 Insight</div>
+        <div class="tag-chip" onclick="insertTag('[ANCHOR] ⚓ ')">⚓ Anchor</div>
+        <div class="tag-chip" onclick="insertTag('[KEY] 🔑 ')">🔑 Key</div>
+        <div class="tag-chip" onclick="insertTag('[QUESTION] ❓ ')">❓ Question</div>
+        <div class="tag-chip" onclick="makeBold()"><b>B</b> Bold</div>
+        <div class="tag-chip" onclick="insertTime()">🕒 Time</div>
+        <div class="tag-chip" onclick="insertTag('─────────────────\n')">— Divider</div>
+      </div>
+
+      <textarea id="notes" placeholder="Begin writing your notes here…&#10;&#10;The Spirit moves where it will…" oninput="onNotesInput(this)"></textarea>
+
+      <div class="note-meta">
+        <span id="noteStats" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px">0 words · 0 lines</span>
+        <span class="saving" id="savingLabel">✦ Saved</span>
+      </div>
+
+      <div class="wc-bar-wrap"><div class="wc-bar" id="wcBar"></div></div>
+
+      <div class="ornament">✦ ✦ ✦</div>
+
+      <div class="flex gap8" style="flex-wrap:wrap">
+        <button class="btn secondary grow" onclick="copyNotes()">📋 Copy All</button>
+        <button class="btn primary grow" onclick="sendEmail()">📧 Email Notes</button>
+        <button class="btn secondary grow" onclick="saveToLibrary()">📚 Save to Library</button>
+      </div>
+      <button class="btn full mt8" style="background:transparent;border:1px solid var(--crimson);color:var(--crimson);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:10px" onclick="confirmReset()">✕ Reset Page</button>
+    </div>
+
+  </div>
 </div>
 
-<!-- Theme toggle -->
-<button type="button" id="themeToggle" class="theme-toggle" onclick="toggleTheme()">🌙</button>
-
-<div id="popup" onclick="closePopup()">
-  <div class="popup-content" onclick="event.stopPropagation()">
-    <h3 id="popupRef"></h3>
-    <textarea id="popupVerse" readonly style="min-height:200px; background:#f9f9f9; border:1px solid #eee;"></textarea>
-    <button type="button" onclick="closePopup()">Close</button>
+<!-- ======================== LIBRARY VIEW ======================== -->
+<div id="library" class="view">
+  <div class="page-wrap">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="libSearch" placeholder="Search sermons…" oninput="renderLibrary()">
+    </div>
+    <div id="libraryList"></div>
   </div>
 </div>
 
+<!-- ======================== INSIGHTS VIEW ======================== -->
+<div id="insights" class="view">
+  <div class="page-wrap">
+    <div id="insightsContent"></div>
+  </div>
+</div>
+
+<!-- ======================== FLOATING BUTTONS ======================== -->
+<div class="fab-group">
+  <div style="position:relative">
+    <button class="fab gold" onclick="jumpToBible()" title="Bible Tools">
+      <span class="fab-tooltip">Bible Tools</span>
+      📖
+    </button>
+  </div>
+  <div style="position:relative">
+    <button class="fab dark-btn" onclick="jumpToNotes()" title="Go to Notes">
+      <span class="fab-tooltip">Notes</span>
+      ✍️
+    </button>
+  </div>
+</div>
+
+<!-- ======================== NOTE DETAIL MODAL ======================== -->
+<div class="modal-back" id="modalDetail">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="detailTitle">Sermon</h3>
+      <button class="btn ghost" onclick="closeModal('modalDetail')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="detailMeta" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px"></div>
+      <pre id="detailBody" style="white-space:pre-wrap;font-family:'EB Garamond',serif;font-size:17px;line-height:1.75;color:var(--ink2)"></pre>
+    </div>
+    <div class="modal-foot">
+      <button class="btn secondary grow" onclick="loadToCompose()">Load to Compose</button>
+      <button class="btn crimson" onclick="deleteFromLibrary()" style="flex:0 0 auto">Delete</button>
+      <button class="btn primary grow" onclick="emailFromLibrary()">Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== CONFIRM RESET MODAL ======================== -->
+<div class="modal-back" id="modalReset">
+  <div class="modal-box" style="max-width:360px">
+    <div class="modal-head"><h3>Clear the Page?</h3></div>
+    <div class="modal-body" style="text-align:center;padding:24px">
+      <div style="font-size:36px;margin-bottom:12px">✦</div>
+      <p style="font-family:'IM Fell English',serif;font-style:italic;font-size:18px;color:var(--ink2)">This will erase the current session notes and fields.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn secondary grow" onclick="closeModal('modalReset')">Cancel</button>
+      <button class="btn crimson grow" onclick="doReset()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<div id="toaster"></div>
+
+<!-- ======================== SCRIPT ======================== -->
 <script>
-const STORE_KEY = "church_archivist_final_v14";
-const THEME_KEY = "sermon_theme";
+/* ===================================================
+   DATA
+=================================================== */
+const STORE  = "archv_session_v2";
+const LIB    = "archv_library_v2";
+const THEME  = "archv_theme";
+
 const bibleData = {
 "Genesis":[50,31,25,24,26,32,22,24,22,29,32,32,20,18,24,21,16,27,33,38,18,34,24,20,67,34,35,46,35,43,55,54,33,20,31,29,43,36,30,23,23,57,38,34,34,28,34,31,22,33,26],
 "Exodus":[40,22,25,22,31,30,30,25,32,35,32,29,51,22,22,27,21,16,27,25,26,36,31,33,18,40,37,21,43,46,38,18,35,23,35,35,38,29,31,43,38],
@@ -394,16 +865,10 @@ const bibleData = {
 "Ezekiel":[48,28,10,27,17,17,14,27,18,11,22,25,28,23,23,8,63,32,32,14,49,32,31,49,27,17,21,36,26,21,26,32,32,33,30,15,38,28,23,38,26,20,26,31,4,26,10,35,35],
 "Daniel":[12,21,49,30,37,31,28,28,27,27,21,45,13],
 "Hosea":[14,11,23,5,19,15,11,16,14,17,15,12,14,16,15],
-"Joel":[3,20,32,21],
-"Amos":[9,15,16,15,13,27,14,17,14,15],
-"Obadiah":[1,21],
-"Jonah":[4,17,10,11,11],
-"Micah":[7,16,13,12,13,15,16,20],
-"Nahum":[3,15,13,19],
-"Habakkuk":[3,17,20,19],
-"Zephaniah":[3,18,15,20],
-"Haggai":[2,15,23],
-"Zechariah":[14,21,13,10,14,15,15,23,23,17,12,17,14,9,21],
+"Joel":[3,20,32,21],"Amos":[9,15,16,15,13,27,14,17,14,15],
+"Obadiah":[1,21],"Jonah":[4,17,10,11,11],"Micah":[7,16,13,12,13,15,16,20],
+"Nahum":[3,15,13,19],"Habakkuk":[3,17,20,19],"Zephaniah":[3,18,15,20],
+"Haggai":[2,15,23],"Zechariah":[14,21,13,10,14,15,15,23,23,17,12,17,14,9,21],
 "Malachi":[4,14,17,18,6],
 "Matthew":[28,25,23,17,25,48,34,29,34,38,42,30,50,58,36,39,28,27,35,30,34,46,39,51,46,75,66,20],
 "Mark":[16,45,28,35,41,43,56,37,38,50,52,33,44,37,72,47,20],
@@ -413,279 +878,550 @@ const bibleData = {
 "Romans":[16,32,29,31,25,21,23,25,39,33,21,36,21,14,23,33,27],
 "1 Corinthians":[16,31,16,23,21,13,20,40,13,27,33,34,31,13,40,58,24],
 "2 Corinthians":[13,24,17,18,18,21,18,17,24,15,18,33,21,14],
-"Galatians":[6,24,21,31,31,26,18],
-"Ephesians":[6,23,22,21,32,33,24],
-"Philippians":[4,30,30,21,23],
-"Colossians":[4,29,23,25,18],
-"1 Thessalonians":[5,10,20,13,18,28],
-"2 Thessalonians":[3,12,17,18],
-"1 Timothy":[6,20,15,16,16,25,21],
-"2 Timothy":[4,18,26,17,22],
-"Titus":[3,16,15,15],
-"Philemon":[1,25],
+"Galatians":[6,24,21,31,31,26,18],"Ephesians":[6,23,22,21,32,33,24],
+"Philippians":[4,30,30,21,23],"Colossians":[4,29,23,25,18],
+"1 Thessalonians":[5,10,20,13,18,28],"2 Thessalonians":[3,12,17,18],
+"1 Timothy":[6,20,15,16,16,25,21],"2 Timothy":[4,18,26,17,22],
+"Titus":[3,16,15,15],"Philemon":[1,25],
 "Hebrews":[13,14,18,19,16,14,20,28,13,28,39,40,29,25],
-"James":[5,27,26,18,17,20],
-"1 Peter":[5,25,25,22,19,14],
-"2 Peter":[3,21,22,18],
-"1 John":[5,10,29,24,21,21],
-"2 John":[1,13],
-"3 John":[1,14],
-"Jude":[1,25],
+"James":[5,27,26,18,17,20],"1 Peter":[5,25,25,22,19,14],"2 Peter":[3,21,22,18],
+"1 John":[5,10,29,24,21,21],"2 John":[1,13],"3 John":[1,14],"Jude":[1,25],
 "Revelation":[22,20,29,22,11,14,17,17,13,21,11,19,17,18,20,8,21,24,18,21,15,21,21]
 };
 const books = Object.keys(bibleData);
-const sep="----------------------------";
+let library = JSON.parse(localStorage.getItem(LIB) || '[]');
+let verseHist = JSON.parse(localStorage.getItem('archv_vhist') || '[]');
+let lastPos = null, lastScroll = null;
+let currentDetailId = null;
+let lastFetchedVerse = '';
+let darkMode = false;
 
-date.valueAsDate=new Date();
-
-/* Theme */
-function applyTheme(theme){
-  document.documentElement.setAttribute('data-theme',theme);
-  const tBtn=document.getElementById('themeToggle');
-  if(tBtn) tBtn.textContent = theme==='dark' ? '☀️' : '🌙';
-}
+/* ===================================================
+   THEME
+=================================================== */
 (function initTheme(){
-  const stored = localStorage.getItem(THEME_KEY);
-  let theme = stored;
-  if(!theme){
-    theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
-  }
-  applyTheme(theme);
+  const stored = localStorage.getItem(THEME);
+  darkMode = stored ? stored==='dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme();
 })();
-function toggleTheme(){
-  const current = document.documentElement.getAttribute('data-theme')==='dark' ? 'dark':'light';
-  const next = current==='dark' ? 'light':'dark';
-  applyTheme(next);
-  localStorage.setItem(THEME_KEY,next);
+function applyTheme(){
+  document.body.classList.toggle('dark', darkMode);
+  document.getElementById('themeBtn').textContent = darkMode ? '☀' : '☽';
+  localStorage.setItem(THEME, darkMode?'dark':'light');
 }
+function toggleTheme(){ darkMode=!darkMode; applyTheme(); }
 
-/* Restore */
+/* ===================================================
+   INIT
+=================================================== */
+document.getElementById('date').valueAsDate = new Date();
 (function restore(){
-  const d=JSON.parse(localStorage.getItem(STORE_KEY)||"{}");
-  if(d.date) date.value=d.date;
-  if(d.subject) subject.value=d.subject;
-  if(d.notes) notes.value=d.notes;
-  updateNoteStats();
+  const d = JSON.parse(localStorage.getItem(STORE)||'{}');
+  if(d.date)    document.getElementById('date').value = d.date;
+  if(d.subject) document.getElementById('subject').value = d.subject;
+  if(d.speaker) document.getElementById('speaker').value = d.speaker;
+  if(d.occasion)document.getElementById('occasion').value = d.occasion;
+  if(d.notes)   document.getElementById('notes').value = d.notes;
+  updateStats();
+  renderVerseHist();
 })();
 
+/* ===================================================
+   SAVE
+=================================================== */
+let saveTimer = null;
 function save(){
-  localStorage.setItem(STORE_KEY, JSON.stringify({
-    date:date.value, subject:subject.value, notes:notes.value
-  }));
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    localStorage.setItem(STORE, JSON.stringify({
+      date:    document.getElementById('date').value,
+      subject: document.getElementById('subject').value,
+      speaker: document.getElementById('speaker').value,
+      occasion:document.getElementById('occasion').value,
+      notes:   document.getElementById('notes').value
+    }));
+    const lbl = document.getElementById('savingLabel');
+    lbl.classList.add('show');
+    setTimeout(()=>lbl.classList.remove('show'), 1500);
+  }, 600);
 }
-setInterval(save,5000);
+setInterval(()=>{ save(); }, 8000);
 
-function updateNoteStats(){
-  const text = notes.value || "";
-  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-  const lines = text ? text.split('\n').length : 0;
-  noteStats.textContent = `${words} words · ${lines} lines`;
+/* ===================================================
+   TABS
+=================================================== */
+function switchTab(btn, view){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(view).classList.add('active');
+  if(view==='library') renderLibrary();
+  if(view==='insights') renderInsights();
 }
 
-/* Bible tools */
+/* ===================================================
+   NOTES INPUT
+=================================================== */
+function onNotesInput(el){
+  updateStats();
+  rememberPos();
+  save();
+}
+function updateStats(){
+  const txt = document.getElementById('notes').value || '';
+  const words = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+  const lines = txt ? txt.split('\n').length : 0;
+  document.getElementById('noteStats').textContent = `${words.toLocaleString()} words · ${lines} lines`;
+  // word count bar (up to 1000 words = full)
+  const pct = Math.min(100, (words/1000)*100);
+  document.getElementById('wcBar').style.width = pct+'%';
+}
+function rememberPos(){
+  const el = document.getElementById('notes');
+  lastPos = el.selectionStart;
+  lastScroll = el.scrollTop;
+}
+
+/* ===================================================
+   BIBLE TOOLS
+=================================================== */
 function filterBooks(){
-  bookList.innerHTML="";
-  const q=bookInput.value.toLowerCase();
-  if(!q){bookList.style.display="none";return;}
-  books.filter(b => b.toLowerCase().includes(q)).forEach(b=>{
-    const d=document.createElement("div");
-    d.className="book-item";
-    d.textContent=b;
-    d.onclick=()=>{ selectBook(b); };
-    bookList.appendChild(d);
+  const list = document.getElementById('bookList');
+  list.innerHTML = '';
+  const q = document.getElementById('bookInput').value.toLowerCase();
+  if(!q){ list.style.display='none'; return; }
+  const matches = books.filter(b=>b.toLowerCase().includes(q));
+  if(!matches.length){ list.style.display='none'; return; }
+  matches.forEach((b,i)=>{
+    const div = document.createElement('div');
+    div.className = 'book-item' + (i===0?' highlight':'');
+    div.textContent = b;
+    div.onclick = ()=>selectBook(b);
+    list.appendChild(div);
   });
-  bookList.style.display="block";
+  list.style.display = 'block';
 }
 function selectBook(b){
-  bookInput.value=b;
-  bookList.style.display="none";
-  const totalCh=bibleData[b][0];
-  chCap.textContent=`${totalCh} Chs`;
-  chapter.max=totalCh;
+  document.getElementById('bookInput').value = b;
+  document.getElementById('bookList').style.display = 'none';
+  const totalCh = bibleData[b][0];
+  document.getElementById('chCap').textContent = totalCh+' Chapters';
+  document.getElementById('chapter').max = totalCh;
   updateVerseLimit();
 }
 function updateVerseLimit(){
-  const b=bookInput.value;
-  const ch=parseInt(chapter.value)||1;
+  const b = document.getElementById('bookInput').value;
+  const ch = parseInt(document.getElementById('chapter').value)||1;
   if(bibleData[b]){
-    const vMax=bibleData[b][ch]||1;
-    vCap.textContent=`${vMax} Max`;
-    verseFrom.max=vMax;
-    verseTo.max=vMax;
+    const vm = bibleData[b][ch]||1;
+    document.getElementById('vCap').textContent = vm+' Verses max';
+    document.getElementById('verseFrom').max = vm;
+    document.getElementById('verseTo').max = vm;
   }
 }
 function syncVerseTo(){
-  const fromVal=parseInt(verseFrom.value);
-  const toVal=parseInt(verseTo.value);
-  if(fromVal>toVal) verseTo.value=fromVal;
+  const f = parseInt(document.getElementById('verseFrom').value)||1;
+  const t = parseInt(document.getElementById('verseTo').value)||1;
+  if(f>t) document.getElementById('verseTo').value = f;
 }
 function clearBook(){
-  bookInput.value='';
-  chCap.textContent='-- Chs';
-  vCap.textContent='-- Max';
-  bookList.style.display="none";
-  bookInput.focus();
+  document.getElementById('bookInput').value='';
+  document.getElementById('chCap').textContent='— Chs';
+  document.getElementById('vCap').textContent='— Max';
+  document.getElementById('bookList').style.display='none';
+  document.getElementById('bookInput').focus();
 }
 function refText(){
-  const f=parseInt(verseFrom.value);
-  const t=parseInt(verseTo.value);
-  const finalTo=t<f?f:t;
-  return `${bookInput.value} ${chapter.value}:${f}-${finalTo}`;
+  const b = document.getElementById('bookInput').value;
+  const ch = document.getElementById('chapter').value;
+  const f = parseInt(document.getElementById('verseFrom').value)||1;
+  const t = parseInt(document.getElementById('verseTo').value)||f;
+  return `${b} ${ch}:${f}-${Math.max(f,t)}`;
 }
 function insertAtCursor(text){
-  const start=notes.selectionStart;
-  const end=notes.selectionEnd;
-  notes.value = notes.value.substring(0,start) + text + notes.value.substring(end);
-  notes.selectionStart=notes.selectionEnd=start+text.length;
-  notes.focus();
-  rememberNoteState();
-  save();
-  updateNoteStats();
+  const el = document.getElementById('notes');
+  const s = el.selectionStart, e = el.selectionEnd;
+  el.value = el.value.substring(0,s)+text+el.value.substring(e);
+  el.selectionStart = el.selectionEnd = s+text.length;
+  el.focus();
+  updateStats(); save();
 }
 function addRef(){
-  if(!bookInput.value) return;
-  insertAtCursor(`\n${sep}\n📖 ${refText()} (${version.value.toUpperCase()})\n${sep}\n`);
+  if(!document.getElementById('bookInput').value) return toast('Select a book first','error');
+  const ref = refText();
+  insertAtCursor(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📖 ${ref} (${document.getElementById('version').value.toUpperCase()})\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+  pushVerseHist(ref);
+  toast('Reference inserted', 'gold');
 }
 async function addRefVerse(btn){
-  if(!bookInput.value) return;
-  const oldTxt=btn.textContent;
-  btn.textContent="...";
+  if(!document.getElementById('bookInput').value) return toast('Select a book first','error');
+  const wrap = document.getElementById('refVerseBtn');
+  wrap.classList.add('loading');
+  const ref = refText();
+  const ver = document.getElementById('version').value;
   try{
-    const res=await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
-    const d=await res.json();
-    insertAtCursor(`\n${sep}\n📖 ${refText()} (${version.value.toUpperCase()})\n\n${d.text||""}\n${sep}\n`);
-  }catch(e){
-    alert("Error fetching verse");
-  }finally{
-    btn.textContent=oldTxt;
+    const res = await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=${ver}`);
+    const d = await res.json();
+    const txt = (d.text||'').replace(/\n+/g,' ').trim();
+    insertAtCursor(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📖 ${ref} (${ver.toUpperCase()})\n\n${txt}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+    pushVerseHist(ref);
+    toast('Verse inserted', 'success');
+  } catch(e){
+    toast('Error fetching verse','error');
+  } finally {
+    wrap.classList.remove('loading');
   }
 }
 async function previewVerse(){
-  if(!bookInput.value) return;
-  popup.style.display="block";
-  popupRef.textContent=refText();
-  popupVerse.value="Loading...";
+  const b = document.getElementById('bookInput').value;
+  if(!b) return toast('Select a book first','error');
+  const ref = refText();
+  const ver = document.getElementById('version').value;
+  const box = document.getElementById('versePreviewBox');
+  document.getElementById('vpRef').textContent = `${ref} · ${ver.toUpperCase()}`;
+  document.getElementById('vpText').innerHTML = '<em style="color:var(--muted)">Loading…</em>';
+  box.style.display = 'block';
   try{
-    const res=await fetch(`https://bible-api.com/${encodeURIComponent(refText())}?translation=${version.value}`);
-    const d=await res.json();
-    popupVerse.value=d.text||"Not found";
-  }catch(e){
-    popupVerse.value="Error fetching verse.";
+    const res = await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=${ver}`);
+    const d = await res.json();
+    lastFetchedVerse = d.text||'';
+    // render with verse numbers
+    let html = '';
+    if(d.verses && d.verses.length){
+      d.verses.forEach(v=>{
+        html += `<span class="verse-num">${v.verse}</span>${v.text.trim()} `;
+      });
+    } else { html = d.text||'Not found'; }
+    document.getElementById('vpText').innerHTML = html;
+    pushVerseHist(ref);
+  } catch(e){
+    document.getElementById('vpText').innerHTML='<em>Error fetching verse.</em>';
+    lastFetchedVerse='';
   }
 }
-function closePopup(){popup.style.display="none";}
+function hidePreview(){
+  document.getElementById('versePreviewBox').style.display='none';
+}
+function insertFromPreview(){
+  if(!lastFetchedVerse) return;
+  const ref = document.getElementById('vpRef').textContent;
+  insertAtCursor(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📖 ${ref}\n\n${lastFetchedVerse.replace(/\n+/g,' ').trim()}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+  hidePreview();
+  toast('Verse inserted','success');
+}
 
-/* Notes helpers */
-function insertTemplate(){
-  const template = `[SERMON OUTLINE]\nOccasion: \nSpeaker: \nTheme: \n\nPoint 1: \nPoint 2: \nPoint 3: \n\nSummary: \n\n--------------------------\n`;
-  insertAtCursor(template);
-  const idx=notes.value.indexOf("Occasion: ");
-  if(idx>=0){
-    notes.selectionStart=notes.selectionEnd=idx+"Occasion: ".length;
+/* ===================================================
+   VERSE HISTORY
+=================================================== */
+function pushVerseHist(ref){
+  verseHist = [ref, ...verseHist.filter(r=>r!==ref)].slice(0,8);
+  localStorage.setItem('archv_vhist', JSON.stringify(verseHist));
+  renderVerseHist();
+}
+function renderVerseHist(){
+  const el = document.getElementById('verseHist');
+  if(!verseHist.length){ el.innerHTML=''; return; }
+  el.innerHTML = `<div class="verse-hist-label">✦ Recent Passages</div>` +
+    verseHist.map((r,i)=>`
+      <div class="verse-hist-item" onclick="loadVerseHist('${r.replace(/'/g,"\\'")}')">
+        <span class="vhi-ref">${r}</span>
+        <span class="vhi-del" onclick="event.stopPropagation();removeVerseHist(${i})">✕</span>
+      </div>`).join('');
+}
+function loadVerseHist(ref){
+  // parse: "Book Ch:From-To"
+  const match = ref.match(/^(.+)\s+(\d+):(\d+)-(\d+)$/);
+  if(!match) return;
+  const [,book,ch,from,to] = match;
+  if(bibleData[book]){
+    selectBook(book);
+    document.getElementById('chapter').value = ch;
+    document.getElementById('verseFrom').value = from;
+    document.getElementById('verseTo').value = to;
+    updateVerseLimit();
+    document.getElementById('bibleCard').scrollIntoView({behavior:'smooth'});
   }
 }
-function insertTag(tag){insertAtCursor(tag);}
+function removeVerseHist(i){
+  verseHist.splice(i,1);
+  localStorage.setItem('archv_vhist', JSON.stringify(verseHist));
+  renderVerseHist();
+}
+
+/* ===================================================
+   NOTE TAGS & HELPERS
+=================================================== */
+function insertTemplate(){
+  const t=`╔══════════════════════════════════╗
+  SERMON OUTLINE
+╚══════════════════════════════════╝
+Occasion: 
+Speaker: 
+Theme: 
+
+❶ Point One
+   Supporting thought: 
+
+❷ Point Two
+   Supporting thought: 
+
+❸ Point Three
+   Supporting thought: 
+
+💡 Key Insight: 
+
+🙏 Prayer Response: 
+
+Summary: 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`;
+  insertAtCursor(t);
+  const notes = document.getElementById('notes');
+  const idx = notes.value.indexOf('Occasion: ');
+  if(idx>=0) notes.setSelectionRange(idx+'Occasion: '.length, idx+'Occasion: '.length);
+}
+function insertTag(tag){ insertAtCursor(tag); }
 function insertTime(){
-  insertAtCursor(`[${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] `);
+  insertAtCursor(`[${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}] `);
 }
 function makeBold(){
-  const s=notes.selectionStart;
-  const e=notes.selectionEnd;
-  const txt=notes.value.substring(s,e);
-  if(txt){
-    const bld=`**${txt}**`;
-    notes.value=notes.value.substring(0,s)+bld+notes.value.substring(e);
-    notes.selectionStart=notes.selectionEnd=s+bld.length;
-  }else{
-    insertAtCursor("**BOLD**");
-  }
+  const el = document.getElementById('notes');
+  const s = el.selectionStart, e = el.selectionEnd;
+  const txt = el.value.substring(s,e);
+  if(txt){ insertAtCursor(`**${el.value.substring(s,e)}**`); }
+  else { insertAtCursor('**BOLD TEXT**'); }
 }
 function copyNotes(){
-  notes.select();
-  if(document.execCommand("copy")) alert("Copied!");
+  const txt = document.getElementById('notes').value;
+  if(!txt) return toast('Nothing to copy','error');
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast('Copied to clipboard','success'));
 }
 function sendEmail(){
-  const val=notes.value;
-  let speaker="", occasion="";
-  val.split('\n').forEach(line=>{
-    if(line.includes("Speaker:")) speaker=line.replace("Speaker:","").trim();
-    if(line.includes("Occasion:")) occasion=line.replace("Occasion:","").trim();
+  const notes = document.getElementById('notes').value;
+  const subject = document.getElementById('subject').value || 'Sermon Notes';
+  const speaker = document.getElementById('speaker').value;
+  const occasion = document.getElementById('occasion').value;
+  const date = document.getElementById('date').value;
+  let subj = [occasion, speaker, subject].filter(Boolean).join(' — ');
+  const body = `Date: ${date}\nSpeaker: ${speaker}\nOccasion: ${occasion}\n\n${notes}`;
+  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+  toast('Opening email…','gold');
+}
+
+/* ===================================================
+   LIBRARY
+=================================================== */
+function saveToLibrary(){
+  const subject = document.getElementById('subject').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+  if(!notes) return toast('Notes are empty','error');
+  const record = {
+    id: Date.now().toString(36),
+    date: document.getElementById('date').value,
+    subject: subject || '(Untitled)',
+    speaker: document.getElementById('speaker').value,
+    occasion: document.getElementById('occasion').value,
+    notes,
+    savedAt: new Date().toISOString()
+  };
+  library.unshift(record);
+  localStorage.setItem(LIB, JSON.stringify(library));
+  toast('Saved to Library ✦','success');
+}
+function renderLibrary(){
+  const el = document.getElementById('libraryList'); el.innerHTML='';
+  const q = document.getElementById('libSearch').value.trim().toLowerCase();
+  let pool = library.slice();
+  if(q) pool = pool.filter(r=>(r.subject||'').toLowerCase().includes(q)||(r.notes||'').toLowerCase().includes(q)||(r.speaker||'').toLowerCase().includes(q));
+  if(!pool.length){
+    el.innerHTML=`<div class="empty-state"><div class="es-symbol">✦</div><div class="es-title">${q?'No sermons found':'The library is empty'}</div><div class="es-sub">${q?'Try another search':'Save a sermon to begin the archive'}</div></div>`;
+    return;
+  }
+  pool.forEach(r=>{
+    const div=document.createElement('div'); div.className='saved-note';
+    const wc = r.notes?r.notes.trim().split(/\s+/).length:0;
+    div.innerHTML=`
+      <div class="saved-note-title">${esc(r.subject)}</div>
+      <div class="saved-note-meta">${r.date} · ${r.speaker||''} ${r.occasion?'· '+r.occasion:''} · ${wc} words</div>
+      <div class="saved-note-preview">${esc(r.notes)}</div>
+      <div class="saved-note-actions">
+        <button class="btn secondary sm" onclick="event.stopPropagation();emailRecord('${r.id}')">📧 Email</button>
+        <button class="btn secondary sm" onclick="event.stopPropagation();copyRecord('${r.id}')">📋 Copy</button>
+      </div>
+    `;
+    div.onclick=()=>openDetail(r.id);
+    el.appendChild(div);
   });
-  let subj=[];
-  if(occasion) subj.push(occasion);
-  if(speaker) subj.push(speaker);
-  subj.push(subject.value||"Notes");
-  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(subj.join(" - "))}&body=${encodeURIComponent("Date: "+date.value+"\n\n"+val)}`;
 }
-function resetAll(){
-  if(confirm("Clear?")){
-    localStorage.removeItem(STORE_KEY);
-    location.reload();
-  }
+function openDetail(id){
+  const r = library.find(x=>x.id===id); if(!r) return;
+  currentDetailId = id;
+  document.getElementById('detailTitle').textContent = r.subject||'(Untitled)';
+  document.getElementById('detailMeta').textContent = `${r.date} · ${r.speaker||''} · ${r.occasion||''}`;
+  document.getElementById('detailBody').textContent = r.notes||'';
+  document.getElementById('modalDetail').style.display='flex';
+}
+function loadToCompose(){
+  const r = library.find(x=>x.id===currentDetailId); if(!r) return;
+  document.getElementById('subject').value = r.subject||'';
+  document.getElementById('speaker').value = r.speaker||'';
+  document.getElementById('occasion').value = r.occasion||'';
+  document.getElementById('date').value = r.date||'';
+  document.getElementById('notes').value = r.notes||'';
+  save(); updateStats();
+  closeModal('modalDetail');
+  switchTab(document.querySelector('.tab-btn'), 'compose');
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.view==='compose');
+  });
+  document.getElementById('compose').classList.add('active');
+  ['library','insights'].forEach(v=>document.getElementById(v).classList.remove('active'));
+  toast('Loaded to compose','gold');
+}
+function deleteFromLibrary(){
+  library = library.filter(x=>x.id!==currentDetailId);
+  localStorage.setItem(LIB, JSON.stringify(library));
+  closeModal('modalDetail');
+  renderLibrary();
+  toast('Deleted from library','error');
+}
+function emailFromLibrary(){
+  const r = library.find(x=>x.id===currentDetailId); if(!r) return;
+  const subj = [r.occasion,r.speaker,r.subject].filter(Boolean).join(' — ');
+  const body = `Date: ${r.date}\nSpeaker: ${r.speaker}\nOccasion: ${r.occasion}\n\n${r.notes}`;
+  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+}
+function emailRecord(id){
+  const r=library.find(x=>x.id===id); if(!r) return;
+  const subj=[r.occasion,r.speaker,r.subject].filter(Boolean).join(' — ');
+  const body=`Date: ${r.date}\nSpeaker: ${r.speaker}\nOccasion: ${r.occasion}\n\n${r.notes}`;
+  location.href=`mailto:gospel4mathew@gmail.com?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+}
+function copyRecord(id){
+  const r=library.find(x=>x.id===id); if(!r) return;
+  if(navigator.clipboard) navigator.clipboard.writeText(r.notes).then(()=>toast('Copied','success'));
 }
 
-/* Track last typing position */
-let lastNotePos = null;
-let lastNoteScroll = null;
-function rememberNoteState(){
-  if(typeof notes!=='undefined' && notes){
-    lastNotePos = notes.selectionStart;
-    lastNoteScroll = notes.scrollTop;
-  }
+/* ===================================================
+   INSIGHTS
+=================================================== */
+function renderInsights(){
+  const el = document.getElementById('insightsContent'); el.innerHTML='';
+  const totalSermons = library.length;
+  const totalWords = library.reduce((s,r)=>s+(r.notes?r.notes.trim().split(/\s+/).length:0),0);
+  const avgWords = totalSermons ? Math.round(totalWords/totalSermons):0;
+  const books_mentioned = [];
+  library.forEach(r=>{
+    if(!r.notes) return;
+    Object.keys(bibleData).forEach(b=>{ if(r.notes.includes(b)) books_mentioned.push(b); });
+  });
+  const bookFreq = {};
+  books_mentioned.forEach(b=>bookFreq[b]=(bookFreq[b]||0)+1);
+  const topBooks = Object.entries(bookFreq).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const currWords = (document.getElementById('notes').value||'').trim().split(/\s+/).filter(Boolean).length;
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="section-title">Overview</div>
+      <div class="stat-grid">
+        <div class="stat-tile"><span class="s-num">${totalSermons}</span><span class="s-label">Sermons Archived</span></div>
+        <div class="stat-tile"><span class="s-num">${totalWords.toLocaleString()}</span><span class="s-label">Words Written</span></div>
+        <div class="stat-tile"><span class="s-num">${avgWords}</span><span class="s-label">Avg Words / Sermon</span></div>
+        <div class="stat-tile"><span class="s-num">${currWords}</span><span class="s-label">Current Session</span></div>
+      </div>
+    </div>
+    ${topBooks.length?`
+    <div class="card">
+      <div class="section-title">Most Referenced Books</div>
+      <div class="ref-chips">
+        ${topBooks.map(([b,c])=>`<div class="ref-chip">📖 ${b} <span style="opacity:.6">×${c}</span></div>`).join('')}
+      </div>
+    </div>
+    `:''}
+    <div class="card">
+      <div class="section-title">Recent Sermons</div>
+      ${library.slice(0,5).map(r=>`
+        <div class="saved-note" onclick="switchTab(document.querySelectorAll('.tab-btn')[1],'library');setTimeout(()=>openDetail('${r.id}'),150)">
+          <div class="saved-note-title">${esc(r.subject)}</div>
+          <div class="saved-note-meta">${r.date} · ${r.speaker||'—'}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }
 
-/* Haptic feedback */
-function hapticPulse(){
-  if(navigator && typeof navigator.vibrate === 'function'){
-    navigator.vibrate(30);
-  }
+/* ===================================================
+   RESET
+=================================================== */
+function confirmReset(){ document.getElementById('modalReset').style.display='flex'; }
+function doReset(){
+  localStorage.removeItem(STORE);
+  closeModal('modalReset');
+  location.reload();
 }
 
-/* Scroll: Bible Tools should be at top (no Date visible) */
-function goToBibleTools(){
-  rememberNoteState();  // remember where we were typing
-  const tools=document.getElementById('bibleTools');
-  if(!tools) return;
-  const y = tools.offsetTop - 10;   // align Bible card to top area
-  window.scrollTo({top:y,behavior:'smooth'});
+/* ===================================================
+   FABs
+=================================================== */
+function jumpToBible(){
+  document.getElementById('bibleCard').scrollIntoView({behavior:'smooth', block:'start'});
   setTimeout(()=>{
-    if(bookInput){
-      bookInput.focus();
-      bookInput.select();
-    }
-  },400);
-  hapticPulse();
+    const bi = document.getElementById('bookInput'); bi.focus(); bi.select();
+  }, 450);
+  haptic();
 }
-
-/* Scroll back to Notes, to where you were typing */
-function goBackToNotes(){
-  const notesBox=document.getElementById('notes');
-  if(!notesBox) return;
-  const y = notesBox.offsetTop - 10;
-  window.scrollTo({top:y,behavior:'smooth'});
+function jumpToNotes(){
+  const el = document.getElementById('notes');
+  el.scrollIntoView({behavior:'smooth', block:'center'});
   setTimeout(()=>{
-    notesBox.focus();
-    if(lastNotePos!=null){
-      notesBox.setSelectionRange(lastNotePos,lastNotePos);
-    }
-    if(lastNoteScroll!=null){
-      notesBox.scrollTop=lastNoteScroll;
-    }
+    el.focus();
+    if(lastPos!=null) el.setSelectionRange(lastPos,lastPos);
+    if(lastScroll!=null) el.scrollTop=lastScroll;
   },400);
-  hapticPulse();
+  haptic();
 }
+function haptic(){ if(navigator.vibrate) navigator.vibrate(25); }
 
-/* Events */
-document.addEventListener('input', e=>{
-  if(e.target.id==='notes') updateNoteStats();
+/* ===================================================
+   MODALS
+=================================================== */
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+document.querySelectorAll('.modal-back').forEach(b=>{
+  b.addEventListener('click',e=>{ if(e.target===b) b.style.display='none'; });
 });
-notes.addEventListener('keyup',rememberNoteState);
-notes.addEventListener('click',rememberNoteState);
-notes.addEventListener('input',rememberNoteState);
 
-/* Auto-close dropdown on scroll */
-window.addEventListener('scroll',()=>{
-  if(bookList) bookList.style.display="none";
+/* ===================================================
+   TOAST
+=================================================== */
+function toast(msg, type='gold'){
+  const d=document.createElement('div');
+  d.className=`toast ${type}`;
+  d.textContent=msg;
+  document.getElementById('toaster').appendChild(d);
+  setTimeout(()=>{ d.style.animation='toastOut 0.3s ease forwards'; setTimeout(()=>d.remove(),300); },2200);
+}
+
+/* ===================================================
+   UTILS
+=================================================== */
+function esc(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''; }
+
+/* Close dropdown on outside click / scroll */
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.book-wrap'))
+    document.getElementById('bookList').style.display='none';
+});
+window.addEventListener('scroll',()=>{ document.getElementById('bookList').style.display='none'; });
+
+/* Notes events */
+const notesEl = document.getElementById('notes');
+notesEl.addEventListener('keyup', rememberPos);
+notesEl.addEventListener('click', rememberPos);
+
+/* Keyboard: Ctrl+S / Cmd+S to save */
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='s'){ e.preventDefault(); save(); toast('Saved ✦','gold'); }
+  if(e.key==='Escape') document.querySelectorAll('.modal-back').forEach(b=>b.style.display='none');
 });
 </script>
 </body>
